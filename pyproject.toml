@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "fwa"
+version = "0.1.0"
+description = ""
+authors = ["gx1 <18548727+giper45@users.noreply.github.com>"]
+license = "GPL"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mitmproxy = "^9.0.1"
+typer = {extras = ["all"], version = "^0.7.0"}
+requests = "^2.28.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+fwa = "fwa.main:run"

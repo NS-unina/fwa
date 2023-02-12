@@ -1,0 +1,4 @@
+Payload,Type
+"-eval(""window['pro'%2B'mpt'](8)"")-",XSS
+"r&1\""=1",SQL
+/.../.../.../.../.../,LFI
