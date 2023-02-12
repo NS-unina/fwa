@@ -12,7 +12,7 @@ import requests
 # Disable warning ssl
 import urllib3
 
-from fwa.utils.helper import ProgressBar, fwa_session, to_dict
+from fwa.utils.helper import FWA_PREFIX, ProgressBar, fwa_session, to_dict
 urllib3.disable_warnings()
 
 DEFAULT_TIMEOUT = 2
@@ -157,7 +157,7 @@ def send_from_har(session_name : str, proxy):
 def fuzz_from_har(session_name, payload_file):
     har_file = fwa_session(session_name)
     requests = HarParser.from_file(har_file)
-    fuzz_session_name = "fwa-{}".format(session_name)
+    fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     mitm.start_record(fuzz_session_name, False, True)
     payloads = p.payloads(p.load(payload_file))
     fuzz_reqs = []
@@ -188,7 +188,7 @@ def fuzz_from_har(session_name, payload_file):
 
     
 
-def print_from_har(har_file, proxy):
+def print_from_har(har_file, ):
     requests = HarParser.from_file(har_file)
     for r in requests:
         print(r.complete_url())

@@ -1,4 +1,5 @@
 import json
+from fwa.utils import helper
 from utils.helper import fwa_session_path, iso_time_from_timestamp
 import mitmproxy
 from mitmproxy import http
@@ -11,7 +12,6 @@ from mitmproxy.net.http import cookies
 from mitmproxy.utils import strutils
 import base64
 import json
-import logging
 import os
 import zlib
 
@@ -207,7 +207,7 @@ def done():
 
     with open(os.path.join(fwa_session_path(), "{}.har".format(name)), "wb") as f:
         f.write(raw)
-        logging.info("HAR dump finished (wrote %s bytes to file)" % len(json_dump))
+        helper.info("HAR dump finished (wrote %s bytes to file)" % len(json_dump))
 
 
 def format_cookies(cookie_list):

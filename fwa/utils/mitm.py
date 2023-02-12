@@ -1,13 +1,7 @@
+from logging import info
 import os
 from mitmproxy import ctx
-import logging
 
-logger = logging.getLogger('fwa')
-logger.setLevel(logging.INFO)
-
-
-def info(msg):
-    logger.info(msg) 
 
 
 def recorder_script():
