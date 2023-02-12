@@ -16,6 +16,7 @@ from fwa.utils.helper import ProgressBar, fwa_session, to_dict
 urllib3.disable_warnings()
 
 DEFAULT_TIMEOUT = 2
+MITM_PROXY = "127.0.0.1:8080"
 
 methods = {
     "GET": requests.get,
@@ -154,7 +155,6 @@ def send_from_har(session_name : str, proxy):
         send_request(r, proxy)
 
 def fuzz_from_har(session_name, payload_file):
-    MITM_PROXY = "127.0.0.1:8080"
     har_file = fwa_session(session_name)
     requests = HarParser.from_file(har_file)
     fuzz_session_name = "fwa-{}".format(session_name)
@@ -167,11 +167,11 @@ def fuzz_from_har(session_name, payload_file):
         q_reqs = r.get_fuzz_reqs("query_params", payloads)
         ### FD
         # c_reqs = r.get_fuzz_reqs("cookies", payloads)
-        # h_reqs = r.get_fuzz_reqs("headers", payloads)
+        h_reqs = r.get_fuzz_reqs("headers", payloads)
         # b_reqs = r.get_fuzz_reqs("body", payloads)
-        fuzz_reqs.extend(q_reqs)
+        # fuzz_reqs.extend(q_reqs)
         # fuzz_reqs.extend(c_reqs)
-        # fuzz_reqs.extend(h_reqs)
+        fuzz_reqs.extend(h_reqs)
         # fuzz_reqs.extend(b_reqs)
     print("Fuzz reqs {}".format(len(fuzz_reqs)))
     i = 0
