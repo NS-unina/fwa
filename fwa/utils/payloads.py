@@ -1,7 +1,13 @@
 
 import csv
+from typing import TypedDict
 
-def load(csv_file):
+class Payload(TypedDict):
+    Payload :   str
+    Type    :   str
+
+
+def load(csv_file) -> list[Payload]:
     rows = []
     i = 0
     with open(csv_file) as f: 

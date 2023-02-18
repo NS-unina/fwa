@@ -1,6 +1,7 @@
 import os
 from fwa.fuzzer import Request
 from fwa.utils import har
+from fwa.utils.helper import fuzz_all
 
 def req():
     url = "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&b=bb" 
@@ -54,16 +55,30 @@ def dircurrent():
 def dirtest():
     return os.path.join(dircurrent(), "tests")
 
+def sessionstest():
+    return os.path.join(dirtest(), "sessions")
+
 
 def hartest():
-    return os.path.join(dirtest(), "test.har")
+    return os.path.join(sessionstest(), "test.har")
 def harfwatest():
-    return os.path.join(dirtest(), "fwa-test.har")
+    return os.path.join(sessionstest(), "fwa-test.har")
 
 ### HAR
 def test_har_parser():
-    entries = har.get_har_entries(hartest())
-    faw_entries = har.get_har_entries(harfwatest())
+    entries = har.get_entries(hartest())
+    faw_entries = har.get_entries(harfwatest())
     assert len(entries) == 100
     assert len(faw_entries) == 1998
     # har = HAR()
+
+
+def test_helper_values():
+    pass
+    # headers = ["h1", "h2"]
+    # values = [{"h1": "q"}, {"h2" : "d"}]
+    # assert helper.get_values()
+
+def test_selectors():
+    assert fuzz_all([True, False]) == False
+    assert fuzz_all([True, True]) == True

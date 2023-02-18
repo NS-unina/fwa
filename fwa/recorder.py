@@ -205,9 +205,10 @@ def done():
     # if ctx.options.hardump.endswith(".zhar"):
     #     raw = zlib.compress(raw, 9)
 
-    with open(os.path.join(fwa_session_path(), "{}.har".format(name)), "wb") as f:
+    final_file = os.path.join(fwa_session_path(), "{}.har".format(name))
+    with open(final_file, "wb") as f:
         f.write(raw)
-        helper.info("HAR dump finished (wrote %s bytes to file)" % len(json_dump))
+        helper.info("HAR dump finished (wrote %s bytes to {})".format(len(json_dump), final_file))
 
 
 def format_cookies(cookie_list):

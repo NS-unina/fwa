@@ -1,6 +1,67 @@
-"""This anlayzer looks for strings in the response and return a list of boolean values
-"""
+import re
 
 
-def analyze(**kwargs):
-    content = kwargs['response']
+KEYWORDS =  [
+    "File not found",
+    "No such file",
+    "uid=",
+    "gid=",
+    "groups=",
+    "Permission denied",
+    "whoami",
+    "root:",
+    "daemon:",
+    "error",
+    "exception",
+    "illegal",
+    "invalid",
+    "fail",
+    "stack",
+    "access",
+    "directory",
+    "not found",
+    "unknown",
+    "uid=",
+    "ODBC",
+    "SQL",
+    "quotation mark",
+    "syntax",
+    "ORA-",
+    "111111"
+  ]
+
+
+def clean(s):
+    return re.sub(r'\W+', '', s)
+
+def keywords_search(html):
+    """
+    :param keyword_list: lista di keyword su cui iterare
+    :param response: http response
+    :param results: dict results
+    :return:
+    """
+    results = {}
+    for k in KEYWORDS:
+        match = re.search(re.escape(k), html, re.IGNORECASE)
+        results["{}_in_response".format(clean(k))] = 1 if match is not None else 0
+
+        # if match is not None:
+        #     results.update({k: 1})
+        # else:
+        #     results.update({k: 0})
+
+    return results
+
+
+
+
+def analyze(valid_entry, fuzz_entry):
+    resp = []
+    valid_response = valid_entry['response']
+    valid_size = valid_response['content']['size']
+    html = fuzz_entry['response']['content']['text']
+    # {'string' : 1|0}
+    results = keywords_search(html)
+
+    return results

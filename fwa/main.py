@@ -1,6 +1,8 @@
 import os
+import sys
 from typing import Optional
-from fwa.utils import helper
+from fwa import oracle_manager
+from fwa.utils import helper, payloads
 from fwa.utils.helper import FWA_PREFIX, fwa_default_analyzers_path, fwa_init, fwa_list_sessions, fwa_package_path, fwa_session
 from fwa.utils import mitm
 import typer
@@ -43,29 +45,36 @@ def stop_record():
     pass
 
 
-
 @typer_app.command()
-def fuzz(session_name: str, payload_file: str = typer.Argument("payloads.csv", help="The csv payload in the form <payload>,<payload_type>")):
+def fuzz(session_name: str = typer.Argument(..., help="The session name, taken from ~/.fwa/sessions folder"), 
+    payload_file: str = typer.Option("payloads.csv", help="The csv payload in the form <payload>,<payload_type>"), 
+    cookies: bool = typer.Option(False, help="If set, fuzz the cookies"),
+    querystring: bool = typer.Option(False, help="If set, fuzz the params in the query string"),
+    body: bool = typer.Option(False, help="If set, fuzz the params in the body "),
+    headers: bool = typer.Option(False, help="If set, fuzz the headers"),
+    ):
     if session_name not in fwa_list_sessions():
         helper.err("Session \"{}\" not found, run \"fwa list\" to show availabe sessions.".format(session_name))
-    fuzzer.fuzz_from_har(session_name, payload_file)
+    fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers)
+
 
 @typer_app.command()
-def analyze(session_name: str = typer.Argument(..., help="The base session name"), fuzz_session_name: Optional[str] = typer.Argument("", help="The fuzzing session name"), analyzers = typer.Argument("", help="The analyzers' folder")):
+def analyze(session_name: str = typer.Argument(..., help="The base session name"), fuzz_session_name: Optional[str] = typer.Argument("", help="The fuzzing session name"), payload_file: str = typer.Argument("payloads.csv", help="The csv payload in the form <payload>,<payload_type>"), analyzers = typer.Option("", help="The analyzers' folder"), output = typer.Option('observations.csv', help="Detected observations")):
     if not fuzz_session_name: 
         fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     if not analyzers: 
         analyzers = fwa_default_analyzers_path()
+    ploads = payloads.load(payload_file)
+    am.run(session_name, fuzz_session_name, analyzers, ploads, "output.csv")
 
-    am.run(session_name, fuzz_session_name, analyzers, "output.csv")
+@typer_app.command()
+def oracle(analyzer_file: str = typer.Argument(..., help="The observation file")):
+    oracle_manager.oracle(analyzer_file)
         
 
-
-
-    pass
-
-
-
 def run():
-    typer_app()
+    command = typer.main.get_command(typer_app)
+    result = command(standalone_mode=False)
+    return result
+    # typer_app()
     

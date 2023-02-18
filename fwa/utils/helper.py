@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import functools
 import os
 from pathlib import Path
 import sys
@@ -57,7 +58,8 @@ def info(msg):
     logger.info(msg)
 def dbg(msg):
     logger.debug(msg)
-    sys.exit(-1)
+def warn(msg):
+    logger.warning(msg)
 def err(msg):
     logger.error(msg)
     sys.exit(-1)
@@ -165,4 +167,15 @@ class ProgressBar:
         # Print New Line on Complete
         if iteration == self.total:
             print()
+
+
+
+def fuzz_all(selectors: list):
+    """Fuzz all if all are selected
+    Args:
+        selectors (list(bool)): The list of boolean
+    """
+    return functools.reduce(lambda a,b : a and b, selectors)
+
+
 
