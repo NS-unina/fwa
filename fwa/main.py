@@ -18,7 +18,7 @@ typer_app = typer.Typer(add_completion=False, context_settings={"help_option_nam
 
 @typer_app.command()
 def record(session_name: str, quiet: bool = typer.Option(False, help="Quiet mode"), background : bool = typer.Option(False, help="If mitmdump should run in background")):
-    """Run the listener
+    """ Records a sessions and store in ~/.fwa folder
     """
     fwa_init()
     mitm.start_record(session_name, quiet, background)
@@ -27,7 +27,9 @@ def record(session_name: str, quiet: bool = typer.Option(False, help="Quiet mode
 
 @typer_app.command()
 def list():
-    print(fwa_list_sessions())
+    """List the sessions """
+    for s in fwa_list_sessions():
+        print(s)
 
 @typer_app.command()
 def replay(session_name: str, proxy: str = typer.Option("", help="proxy (<host>:<port>)")):
@@ -46,13 +48,16 @@ def stop_record():
 
 
 @typer_app.command()
-def fuzz(session_name: str = typer.Argument(..., help="The session name, taken from ~/.fwa/sessions folder"), 
+def fuzz(session_name: str = typer.Argument(..., help="The session name, taken from ~/.fwa/sessions folder"),
     payload_file: str = typer.Option("payloads.csv", help="The csv payload in the form <payload>,<payload_type>"), 
     cookies: bool = typer.Option(False, help="If set, fuzz the cookies"),
     querystring: bool = typer.Option(False, help="If set, fuzz the params in the query string"),
     body: bool = typer.Option(False, help="If set, fuzz the params in the body "),
     headers: bool = typer.Option(False, help="If set, fuzz the headers"),
     ):
+    """ 
+    Fuzz a session obtained with the record command
+    """
     if session_name not in fwa_list_sessions():
         helper.err("Session \"{}\" not found, run \"fwa list\" to show availabe sessions.".format(session_name))
     fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers)
@@ -60,6 +65,15 @@ def fuzz(session_name: str = typer.Argument(..., help="The session name, taken f
 
 @typer_app.command()
 def analyze(session_name: str = typer.Argument(..., help="The base session name"), fuzz_session_name: Optional[str] = typer.Argument("", help="The fuzzing session name"), payload_file: str = typer.Argument("payloads.csv", help="The csv payload in the form <payload>,<payload_type>"), analyzers = typer.Option("", help="The analyzers' folder"), output = typer.Option('observations.csv', help="Detected observations")):
+    """ The command analyzes the session name and generate a csv containing the list of observations.
+
+    Args:
+        session_name (str, optional): _description_. Defaults to typer.Argument(..., help="The base session name").
+        fuzz_session_name (Optional[str], optional): _description_. Defaults to typer.Argument("", help="The fuzzing session name").
+        payload_file (str, optional): _description_. Defaults to typer.Argument("payloads.csv", help="The csv payload in the form <payload>,<payload_type>").
+        analyzers (_type_, optional): _description_. Defaults to typer.Option("", help="The analyzers' folder").
+        output (_type_, optional): _description_. Defaults to typer.Option('observations.csv', help="Detected observations").
+    """
     if not fuzz_session_name: 
         fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     if not analyzers: 
@@ -68,9 +82,16 @@ def analyze(session_name: str = typer.Argument(..., help="The base session name"
     am.run(session_name, fuzz_session_name, analyzers, ploads, "output.csv")
 
 @typer_app.command()
-def oracle(analyzer_file: str = typer.Argument(..., help="The observation file")):
-    oracle_manager.oracle(analyzer_file)
+def oracle(observation_file: str = typer.Argument(..., help="The observation file")):
+    """ The command receives the observations_file and detects vulenrabilities through the "oracle" 
+
+    Args:
+        analyzer_file (str, optional): _description_. Defaults to typer.Argument(..., help="The observation file").
+    """
+    oracle_manager.oracle(observation_file)
         
+
+
 
 def run():
     command = typer.main.get_command(typer_app)

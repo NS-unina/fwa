@@ -175,7 +175,7 @@ def fuzz_all(selectors: list):
     Args:
         selectors (list(bool)): The list of boolean
     """
-    return functools.reduce(lambda a,b : a and b, selectors)
+    return not functools.reduce(lambda a,b : a and b, selectors)
 
 
 

@@ -166,7 +166,9 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     for r  in requests:
         ### FD
         # IF all set to false (default), fuzz everything
+        # print(fuzz_all([querystring, body, cookies, headers]))
         if fuzz_all([querystring, body, cookies, headers]):
+            print("FUZZ EVERYTHING")
             helper.info("Fuzz everything")
             q_reqs = r.get_fuzz_reqs("query_params", payloads)
             c_reqs = r.get_fuzz_reqs("cookies", payloads)
