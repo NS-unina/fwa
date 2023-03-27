@@ -15,7 +15,13 @@ Records a new session:
 ```   
 fwa records <session name>
 ``` 
-it starts a proxy on `127.0.0.1:8080` 
+it starts a proxy on `127.0.0.1:8080`   
+By default, the session will run in `interactive` mode. You can stop it with `ctrl+C` . 
+If the session runs in `background` model (`--background flag`) you can stop it with: 
+``` 
+fwa stop-record
+```  
+
 
 ### Replay 
 To repeat the session: 
@@ -27,6 +33,25 @@ fwa replay <session name>
 To fuzz a session: 
 ``` 
 fwa fuzz <session name> 
+```  
+
+### Analyze 
+Analyze a session and generate a `csv`.  
+```
+fwa analyze <session name>
+Args:
+    session_name (str, optional): _description_. Defaults to typer.Argument(..., help="The base session name").
+    fuzz_session_name (Optional[str], optional): _description_. Defaults to typer.Argument("", help="The fuzzing session name").
+    payload_file (str, optional): _description_. Defaults to typer.Argument("payloads.csv", help="The csv payload in the form <payload>,<payload_type>").
+    analyzers (_type_, optional): _description_. Defaults to typer.Option("", help="The analyzers' folder").
+    output (_type_, optional): _description_. Defaults to typer.Option('observations.csv', help="Detected observations").
+    """
+``` 
+
+### Oracle 
+The command receives the observations_file and detects vulnerabilities through the "oracle" 
+``` 
+fwa oracle  <observation file>
 ```
 
 ## Examples
