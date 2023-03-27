@@ -28,6 +28,7 @@ def record(session_name: str, quiet: bool = typer.Option(False, help="Quiet mode
 @typer_app.command()
 def list():
     """List the sessions """
+    fwa_init()
     for s in fwa_list_sessions():
         print(s)
 
