@@ -43,6 +43,8 @@ class Request:
         self.headers = to_dict(headers)
         self.body = body
 
+
+
     def complete_url(self):
         return self.url + "?" + urlencode(self.query_params)
     
@@ -138,6 +140,8 @@ def send_request(req, proxy = None):
             if req.method == "POST":
                 resp = requests.post(req.complete_url() , cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = req.body, headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
             else:
+                print("GET")
+                print(req.complete_url())
                 resp = req_function(req.complete_url(), cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, headers = req.headers, allow_redirects= False, timeout=DEFAULT_TIMEOUT)
             req.timestamp_end = helper.timestamp()
             return resp

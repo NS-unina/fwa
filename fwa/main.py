@@ -80,16 +80,21 @@ def analyze(session_name: str = typer.Argument(..., help="The base session name"
     if not analyzers: 
         analyzers = fwa_default_analyzers_path()
     ploads = payloads.load(payload_file)
-    am.run(session_name, fuzz_session_name, analyzers, ploads, "output.csv")
+    am.run(session_name, fuzz_session_name, analyzers, ploads, "observations.csv")
 
 @typer_app.command()
-def oracle(observation_file: str = typer.Argument(..., help="The observation file")):
+def oracle(observation_file: str = typer.Argument(..., help="The observation file"), rules_path: Optional[str] = typer.Argument("", help="The path containing the list of Oracle rules") ):
     """ The command receives the observations_file and detects vulenrabilities through the "oracle" 
 
     Args:
         analyzer_file (str, optional): _description_. Defaults to typer.Argument(..., help="The observation file").
     """
-    oracle_manager.oracle(observation_file)
+    # TODO: extract as variables
+    output_file = 'vulnerabilities.csv'
+    save_no_vulns = True
+    if not rules_path: 
+        rules_path = oracle_manager.get_default_oracle_path()
+    oracle_manager.oracle(observation_file, rules_path, output_file, save_no_vulns)
         
 
 

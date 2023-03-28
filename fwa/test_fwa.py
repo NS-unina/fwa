@@ -1,6 +1,8 @@
 import os
+from fwa import fuzzer
 from fwa.fuzzer import Request
 from fwa.utils import har
+from fwa.utils import helper
 from fwa.utils.helper import fuzz_all
 
 def req():
@@ -11,6 +13,9 @@ def req():
     r = Request(url, method, cookies, headers)
     return r
 
+def test_create_qs():
+    r = {'a' : 'argsa' , 'b': 'argsb'}
+    assert helper.create_query_string(r) == "a=argsa&b=argsb"
 def test_parse_qs():
     # assert r.url_names() == ["a", "b"]
     r = req()

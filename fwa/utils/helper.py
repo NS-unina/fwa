@@ -35,6 +35,13 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+
+def create_query_string(data: dict):
+    ret = ""
+    for k, d in data.items():
+        ret = ret + "{}={}&".format(k, d)
+    return ret[:-1]
+
 def setup_custom_logger(name):
     formatter = CustomFormatter()
     # logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',

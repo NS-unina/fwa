@@ -24,6 +24,7 @@ KEYWORDS =  [
     "uid=",
     "ODBC",
     "SQL",
+    "SQLSyntaxErrorException",
     "quotation mark",
     "syntax",
     "ORA-",
@@ -60,6 +61,7 @@ def analyze(valid_entry, fuzz_entry):
     resp = []
     valid_response = valid_entry['response']
     valid_size = valid_response['content']['size']
+    print(fuzz_entry['request']['url'])
     html = fuzz_entry['response']['content']['text']
     # {'string' : 1|0}
     results = keywords_search(html)

@@ -82,7 +82,7 @@ def write_analyzers(results_file, csv_entries):
 
     with open(results_file, 'w') as f:
         fnames = csv_entries[0].keys()
-        writer = csv.DictWriter(f, fieldnames=fnames)
+        writer = csv.DictWriter(f, fieldnames=fnames, delimiter=";")
         writer.writeheader()
         for c in csv_entries:
             writer.writerow(c)
@@ -119,6 +119,7 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
 
 
     write_analyzers(results_file, csv_entries)
+    helper.info("Write results in {}".format(results_file))
                     # o[header] = observation
                 # print(used_payload)
                 # single_fuzz_observations.append(_run_analyzer(a, valid_entry, single_fuzz_entry)))
