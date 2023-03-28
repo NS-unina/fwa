@@ -77,6 +77,9 @@ def get_fuzz_entries(valid_entries, fuzz_entries) -> list[HarFuzzEntries]:
 
 
 def write_analyzers(results_file, csv_entries):
+    if len(csv_entries) == 0:
+        helper.err("Empty analyzer, cannot write result")
+
     with open(results_file, 'w') as f:
         fnames = csv_entries[0].keys()
         writer = csv.DictWriter(f, fieldnames=fnames)
