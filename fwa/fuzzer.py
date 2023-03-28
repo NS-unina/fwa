@@ -164,10 +164,6 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     print(helper.get_project_root())
     print("Reqs no: {}".format(len(requests)))
     r : Request
-    print(querystring)
-    print(cookies)
-    print(fuzz_all([querystring, body, cookies, headers]))
-    helper.err("Exit")
     if fuzz_all([querystring, body, cookies, headers]):
             helper.info("Fuzz everything")
     for r  in requests:

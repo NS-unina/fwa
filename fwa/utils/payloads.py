@@ -7,6 +7,13 @@ class Payload(TypedDict):
     Type    :   str
 
 
+def trim_dict_keys(d: dict):
+    """Returns a new dictionary with trimmed keys
+    Args:
+        d (dict): The dictionary to modify
+    """
+    return {key.strip(): value for key, value in d.items()}
+
 def load(csv_file) -> list[Payload]:
     rows = []
     i = 0
@@ -16,7 +23,8 @@ def load(csv_file) -> list[Payload]:
             if i == 0:
                 pass
             i = i +1
-            rows.append(r)
+
+            rows.append(trim_dict_keys(r))
     return rows
 
 def payloads(rows):
