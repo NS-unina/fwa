@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import time
 import logging
+from fwa.utils import mitm
 
 # LOGGIN
 
@@ -62,6 +63,7 @@ def warn(msg):
     logger.warning(msg)
 def err(msg):
     logger.error(msg)
+    mitm.stop_record()
     sys.exit(-1)
 
 
@@ -168,6 +170,9 @@ class ProgressBar:
         if iteration == self.total:
             print()
 
+def get_project_root():
+                            # Returns "utils"
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def fuzz_all(selectors: list):
@@ -175,7 +180,7 @@ def fuzz_all(selectors: list):
     Args:
         selectors (list(bool)): The list of boolean
     """
-    return not functools.reduce(lambda a,b : a and b, selectors)
+    return functools.reduce(lambda a,b : a and b, selectors)
 
 
 

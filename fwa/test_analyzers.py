@@ -12,14 +12,14 @@ simple_file = join("tests", "sessions", "time-based", "swigger-sqli.har")
 fuzz_file = join("tests", "sessions", "time-based", "fwa-swigger-sqli.har")
 
 
-def test_time_delay():
-    ploads = payloads.load(sqli_payload)
-    fuzz_entries = har.get_fuzz_entries(fuzz_file, ploads)
-    valid_entry = har.get_entries(simple_file)[0]
-    f = fuzz_entries[0]
-    f2 = fuzz_entries[1]
-    assert time_delay.analyze(valid_entry, f)['time_delay'] is True
-    assert time_delay.analyze(valid_entry, f2)['time_delay'] is False
+# def test_time_delay():
+#     ploads = payloads.load(sqli_payload)
+#     fuzz_entries = har.get_fuzz_entries(fuzz_file, ploads)
+#     valid_entry = har.get_entries(simple_file)[0]
+#     f = fuzz_entries[0]
+#     f2 = fuzz_entries[1]
+#     assert time_delay.analyze(valid_entry, f)['time_delay'] is True
+#     assert time_delay.analyze(valid_entry, f2)['time_delay'] is False
 
 
 

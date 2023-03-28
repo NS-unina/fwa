@@ -1,11 +1,12 @@
 from logging import info
+from fwa.utils import helper
 import os
 from mitmproxy import ctx
 
 
 
 def recorder_script():
-    return os.path.join("fwa", "recorder.py")
+    return os.path.join(helper.get_project_root(), "recorder.py")
 
 def mitm_cmd(session_name, quiet = False):
     return "mitmdump -s {} {} -k --set session={}".format(recorder_script(), "-q" if quiet else "", session_name)
@@ -13,6 +14,7 @@ def mitm_cmd(session_name, quiet = False):
 def start_record(session_name, quiet, background):
     info("Start fwa record")
     if background:
+        print(mitm_cmd(session_name, quiet) + " &")
         os.system(mitm_cmd(session_name, quiet) + " &")
 
     else:
