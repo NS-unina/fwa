@@ -33,7 +33,15 @@ fwa replay <session name>
 To fuzz a session: 
 ``` 
 fwa fuzz <session name> 
-```  
+```    
+Options:
+```
+--payload-file                          TEXT  The csv payload in the form <payload>,<payload_type> [default: payloads.csv]                               │
+--cookies           --no-cookies              If set, fuzz the cookies [default: no-cookies]                                                             │
+--querystring       --no-querystring          If set, fuzz the params in the query string [default: no-querystring]                                      │
+--body              --no-body                 If set, fuzz the params in the body [default: no-body]                                                     │
+--headers           --no-headers              If set, fuzz the headers [default: no-headers]                                                             │
+```
 
 ### Analyze 
 Analyze a session and generate a `csv`.  

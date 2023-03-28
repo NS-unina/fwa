@@ -1,4 +1,3 @@
-
 import csv
 
 def get_observations(analyzer_file):
