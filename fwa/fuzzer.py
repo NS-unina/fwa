@@ -46,7 +46,9 @@ class Request:
 
 
     def complete_url(self):
-        return self.url + "?" + urlencode(self.query_params)
+        # return self.url + "?" + urlencode(self.query_params)
+        # To avoid invalid urlencode conditions
+        return self.url + "?" + helper.create_query_string(self.query_params)
     
     def parse_url(self, url):
         parsed_url = urlparse(url)
