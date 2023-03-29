@@ -9,7 +9,7 @@ from fwa.utils import har, payloads
 
 sqli_payload = join("tests", "owasp", "payloads", "sqli.csv")
 simple_file = join("tests", "sessions", "time-based", "swigger-sqli.har")
-fuzz_file = join("tests", "sessions", "owasp", "fwa-owasp-sqli.har")
+fuzz_file = join("tests", "owasp", "sessions", "fwa-owasp-sqli.har")
 
 def test_sqli():
     ploads = payloads.load(sqli_payload)

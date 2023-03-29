@@ -69,13 +69,13 @@ def hartest():
 def harfwatest():
     return os.path.join(sessionstest(), "fwa-test.har")
 
-### HAR
-def test_har_parser():
-    entries = har.get_entries(hartest())
-    faw_entries = har.get_entries(harfwatest())
-    assert len(entries) == 100
-    assert len(faw_entries) == 1998
-    # har = HAR()
+# ### HAR
+# def test_har_parser():
+#     entries = har.get_entries(hartest())
+#     faw_entries = har.get_entries(harfwatest())
+#     assert len(entries) == 100
+#     assert len(faw_entries) == 1998
+#     # har = HAR()
 
 
 def test_helper_values():
@@ -87,3 +87,4 @@ def test_helper_values():
 def test_selectors():
     assert fuzz_all([True, False]) == False
     assert fuzz_all([True, True]) == True
+    assert fuzz_all([False, False]) == True

@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "analyze",
+            "label": "test",
             "type": "shell",
-            "command": "poetry run fwa analyze owasp-cmdi"
+            "command": "poetry run pytest -s"
         }
     ]
 }
