@@ -82,7 +82,7 @@ def write_analyzers(results_file, csv_entries):
 
     with open(results_file, 'w') as f:
         fnames = csv_entries[0].keys()
-        writer = csv.DictWriter(f, fieldnames=fnames, delimiter=";")
+        writer = csv.DictWriter(f, fieldnames=fnames)
         writer.writeheader()
         for c in csv_entries:
             writer.writerow(c)

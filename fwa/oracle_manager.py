@@ -7,7 +7,7 @@ from fwa.utils import helper
 def get_observations(analyzer_file):
     ret = []
     with open(analyzer_file) as csv_file: 
-        csv_reader = csv.DictReader(csv_file, delimiter=";")
+        csv_reader = csv.DictReader(csv_file)
         line_count = 0
         for row in csv_reader:
             if line_count == 0:
@@ -48,7 +48,7 @@ def get_default_oracle_path():
 def write_results(output_file, results):
     with open(output_file, 'w') as f:
         fnames = results[0].keys()
-        writer = csv.DictWriter(f, fieldnames=fnames, delimiter=";")
+        writer = csv.DictWriter(f, fieldnames=fnames)
         writer.writeheader()
         for c in results:
             writer.writerow(c)

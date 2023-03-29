@@ -128,7 +128,7 @@ class HarParser:
 json_obj = []
 
 
-def send_request(req, proxy = None):
+def send_request(req : Request, proxy = None):
     req_function = methods[req.method]
     the_url = urlparse(req.url).scheme
     try:
@@ -140,10 +140,14 @@ def send_request(req, proxy = None):
                 del req.headers['Cookie']
 
             if req.method == "POST":
-                resp = requests.post(req.complete_url() , cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = req.body, headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
+                # if req.url == "https://localhost:8443/benchmark/sqli-00/BenchmarkTest00024":
+                #     print("POST REQUEST")
+                #     print(req.url)
+                #     print(req.body)
+
+                resp = requests.post(req.url, cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = helper.create_query_string(req.body), headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
+                # json dumps to avoid encoding
             else:
-                print("GET")
-                print(req.complete_url())
                 resp = req_function(req.complete_url(), cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, headers = req.headers, allow_redirects= False, timeout=DEFAULT_TIMEOUT)
             req.timestamp_end = helper.timestamp()
             return resp
@@ -163,7 +167,9 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     har_file = fwa_session(session_name)
     requests = HarParser.from_file(har_file)
     fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
-    mitm.start_record(fuzz_session_name, False, True)
+    # Quiet mode
+    # mitm.start_record(fuzz_session_name, True, True)
+    mitm.start_record(fuzz_session_name, True, True)
     payloads = p.payloads(p.load(payload_file))
     fuzz_reqs = []
     flows = []

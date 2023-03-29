@@ -7,4 +7,5 @@ def time_based(obs):
 def oracle(obs):
     return obs['payload_type'] == 'SQL' and time_based(obs) or \
            obs['payload_type'] == 'SQL' and content_based(obs) or \
-           obs['payload_type'] == 'SQL' and obs['status_code'] == 500 
+           obs['payload_type'] == 'SQL' and int(obs['status_code']) == 500 
+        #    obs['payload_type'] == 'SQL' and int(obs['status_code']) == 500 
