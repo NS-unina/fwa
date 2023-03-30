@@ -156,7 +156,8 @@ def flow_entry(flow: mitmproxy.http.HTTPFlow) -> dict:
     if flow.server_conn.connected:
         entry["serverIPAddress"] = str(flow.server_conn.peername[0])
 
-    HAR["log"]["entries"].append(entry)
+    if ctx.options.url is "*" or ctx.options.url in flow.request.pretty_url:
+        HAR["log"]["entries"].append(entry)
 
     return entry
 

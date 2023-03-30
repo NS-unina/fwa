@@ -1,10 +1,13 @@
+
+
+# name: extract_har.py
+# The following script extracts a list of requests on the basis of an har file
+#
+#
 import json
+import sys
 from typing import TypedDict
 from urllib.parse import quote, urlparse
-from fwa.utils import helper
-
-from fwa.utils.payloads import Payload
-# https://w3c.github.io/web-performance/specs/HAR/Overview.html#sec-object-types-entries
 
 def parse_url(url):
     parsed_url = urlparse(url)
@@ -86,73 +89,39 @@ def get_entries(har_file) -> list[HarEntry]:
         # if req['method'] == "POST"
         #     req_obj.body = to_dict(req['postData']['params'])
 
-def get_fuzz_entries(har_file, payloads) ->list:
-    """ Returns a list of HAR entry by adding some attributes (used payload)
-    """
-    har_entries = get_entries(har_file)
-    for he in har_entries: 
-        he['payload'] = find_payload(he, payloads)
-    return har_entries
 
 
 def get_entries_by_url(url: str, entries: list[HarEntry]):
     return [e for e in entries if parse_url(e['request']['url']) == url]
 
-def _find_payload(params, payload: Payload):
-    # Check also for url-encoded values in payload list
-    for p in params: 
-        # name for injection in names
-        if p['name'] == payload['Payload'] or p['name'] == quote(payload['Payload']) or p['value'] == payload['Payload'] or p['value'] == quote(payload['Payload']):
-            p['type'] = payload['Type']
-            return p
-    return None
-
-def _find_from_payloads(params, payloads):
-    for p in payloads: 
-        found = _find_payload(params, p)
-        if found: 
-            return found
-    return None
-
-def find_payload(entry: HarEntry, payloads: list[Payload]): 
-    """ Looks the presence of a payload in the entry
-
-    Args:
-        entry (HarEntry): _description_
-        payloads (str): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    found = None
-    req = entry['request']
-
-    if 'postData' in req.keys():
-        params =req['postData']['params']
-        found = _find_from_payloads(params, payloads)
-        if found: 
-            return found
-    queryString = req['queryString']
-    found = _find_from_payloads(queryString, payloads)
-    if found: 
-        return found
+def get_entries_by_content(content: str, entries: list[HarEntry]):
+    return [e for e in entries if content in parse_url(e['request']['url'])]
 
 
-    headers = req['headers']
-    found = _find_from_payloads(headers, payloads)
-    if found: 
-        return found
+def change_entries(har_file, new_entries, output_file="output.har"):
+    data = {}
+    with open(har_file, 'r') as f:
+        data = json.load(f)
+        data['log']['entries'] = new_entries
+    with open(output_file, 'w') as nf:
+        json.dump(data, nf, ensure_ascii = False, indent=4)
 
-    cookies = req['cookies']
-    found = _find_from_payloads(cookies, payloads)
-    if found: 
-        return found
-    # NONE?
-    return found
 
-    
+def read_list():
+    with open('list.txt') as f: 
+        data = f.readlines()
+    return [d.replace("\n", "") for d in data]
 
-    # for k, v in req['cookies'].items():
-    #     print(v)
-    # for k, v in req['queryString'].items():
-    #     print(v)
+def e():
+    sys.exit(-1)
+if __name__ == '__main__' :
+    har_file = "owasp-sqli.har"
+    har_entries : list[HarEntry]= get_entries(har_file) 
+
+    list_new : list[HarEntry] = []
+    for l in read_list():
+        uh = get_entries_by_content(l, har_entries)
+        if len(uh) > 0:
+            list_new = list_new + uh
+    change_entries(har_file, list_new)
+

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fwa"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["gx1 <18548727+giper45@users.noreply.github.com>"]
 license = "GPL"

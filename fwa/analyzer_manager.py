@@ -105,6 +105,7 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
         single_fuzz_observations = []
         for single_fuzz_entry in all_fuzz_entries:
             used_payload = single_fuzz_entry['payload']
+            print(used_payload)
             if used_payload:
                 o = {}
                 o['url'] = fe['url']

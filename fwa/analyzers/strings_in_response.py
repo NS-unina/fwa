@@ -1,5 +1,7 @@
 import re
 
+from fwa.utils.helper import pretty_print_json
+
 
 KEYWORDS =  [
     "File not found",
@@ -35,7 +37,7 @@ KEYWORDS =  [
 def clean(s):
     return re.sub(r'\W+', '', s)
 
-def keywords_search(html):
+def keywords_search(html, suffix = "_in_response"):
     """
     :param keyword_list: lista di keyword su cui iterare
     :param response: http response
@@ -45,7 +47,7 @@ def keywords_search(html):
     results = {}
     for k in KEYWORDS:
         match = re.search(re.escape(k), html, re.IGNORECASE)
-        results["{}_in_response".format(clean(k))] = 1 if match is not None else 0
+        results["{}{}".format(clean(k), suffix)] = 1 if match is not None else 0
 
         # if match is not None:
         #     results.update({k: 1})
@@ -61,9 +63,10 @@ def analyze(valid_entry, fuzz_entry):
     resp = []
     valid_response = valid_entry['response']
     valid_size = valid_response['content']['size']
-    print(fuzz_entry['request']['url'])
+    valid_html = valid_response['content']['text']
     html = fuzz_entry['response']['content']['text']
     # {'string' : 1|0}
     results = keywords_search(html)
-
+    valid_results = keywords_search(valid_html, "_in_valid_response")
+    results.update(valid_results)
     return results

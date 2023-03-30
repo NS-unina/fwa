@@ -87,6 +87,17 @@ class Request:
                 getattr(r, attribute)[n] = quote(p)
                 reqs.append(r)
 
+        # Add also parameters 
+        for n in names:
+            for p in payloads: 
+                r = deepcopy(self)
+                val = getattr(r, attribute)[n]
+                del getattr(r, attribute)[n]
+                getattr(r, attribute)[quote(p)] = val
+                # Remove previous attribute
+                reqs.append(r)
+
+
         return reqs
 
 
@@ -140,11 +151,10 @@ def send_request(req : Request, proxy = None):
                 del req.headers['Cookie']
 
             if req.method == "POST":
-                # if req.url == "https://localhost:8443/benchmark/sqli-00/BenchmarkTest00024":
-                #     print("POST REQUEST")
-                #     print(req.url)
-                #     print(req.body)
-
+                # Fix header 
+                req.headers['Content-Type'] = "application/x-www-form-urlencoded"
+                if req.url == "https://localhost:8443/benchmark/sqli-00/BenchmarkTest00037":
+                    print(helper.create_query_string(req.body))
                 resp = requests.post(req.url, cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = helper.create_query_string(req.body), headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
                 # json dumps to avoid encoding
             else:
@@ -169,7 +179,7 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     # Quiet mode
     # mitm.start_record(fuzz_session_name, True, True)
-    mitm.start_record(fuzz_session_name, True, True)
+    mitm.start_record("*", fuzz_session_name, False, True)
     payloads = p.payloads(p.load(payload_file))
     fuzz_reqs = []
     flows = []
@@ -201,6 +211,9 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
             if body:
                 helper.info("Fuzz body")
                 b_reqs = r.get_fuzz_reqs("body", payloads)
+
+
+
                 fuzz_reqs.extend(b_reqs)
             if cookies: 
                 helper.info("Fuzz cookies")
@@ -216,7 +229,7 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     # Wait the start of the mitmproxy
     sleep(1)
     pb = ProgressBar(len(fuzz_reqs))
-    for r in fuzz_reqs:
+    for r  in fuzz_reqs:
         print("Req {} - ".format(i))
         resp = send_request(r, MITM_PROXY)
         i = i + 1

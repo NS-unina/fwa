@@ -13,6 +13,7 @@ def req():
     r = Request(url, method, cookies, headers)
     return r
 
+
 def test_create_qs():
     r = {'a' : 'argsa' , 'b': 'argsb'}
     assert helper.create_query_string(r) == "a=argsa&b=argsb"
@@ -44,6 +45,14 @@ def test_fuzz_req():
         "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&b=sql",
         "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=cmdi&b=bb",
         "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&b=cmdi",
+        # Added injection in parameters
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?b=bb&xss=aa",
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?b=bb&sql=aa",
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?b=bb&cmdi=aa",
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&xss=bb",
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&sql=bb",
+        "https://localhost:8443/benchmark/cmdi-02/BenchmarkTest02242?a=aa&cmdi=bb",
+        
 ]
     reqs = r.get_fuzz_reqs("query_params", payloads)
     assert [rr.complete_url() for rr in reqs] == urls

@@ -17,11 +17,11 @@ typer_app = typer.Typer(add_completion=False, context_settings={"help_option_nam
 
 
 @typer_app.command()
-def record(session_name: str, quiet: bool = typer.Option(False, help="Quiet mode"), background : bool = typer.Option(False, help="If mitmdump should run in background")):
+def record(url: str, session_name: str, quiet: bool = typer.Option(False, help="Quiet mode"), background : bool = typer.Option(False, help="If mitmdump should run in background")):
     """ Records a sessions and store in ~/.fwa folder
     """
     fwa_init()
-    mitm.start_record(session_name, quiet, background)
+    mitm.start_record(url, session_name, quiet, background)
 
     # -s repeater.py  -k -q)
 

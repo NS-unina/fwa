@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 import functools
+import json
 import os
 from pathlib import Path
 import sys
@@ -190,4 +191,10 @@ def fuzz_all(selectors: list):
     return not functools.reduce(lambda a,b : a ^ b, selectors)
 
 
+def pretty_print_json(d):
+    print(json.dumps(d, indent=4))
 
+
+
+def debug_print(msg):
+    print(str(msg))
