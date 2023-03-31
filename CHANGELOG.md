@@ -23,6 +23,10 @@ straightforward as possible.
 ### Added 
 * Default analyzer, payload
 * Base commands
+## [0.1.3]
+### Added 
+* Simple web server capability
+* Added phantomjs capability for XSS detection
 
 ## [0.1.2]
 ### Added 

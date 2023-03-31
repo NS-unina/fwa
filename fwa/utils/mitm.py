@@ -9,7 +9,7 @@ def recorder_script():
     return os.path.join(helper.get_project_root(), "recorder.py")
 
 def mitm_cmd(url, session_name, quiet = False):
-    return "mitmdump -s {} {} -k --set url={} --set session={}".format(recorder_script(), "-q" if quiet else "", url, session_name)
+    return "mitmdump -s {} {} -k --set validate_inbound_headers=false --set url={}  --set session={}".format(recorder_script(), "-q" if quiet else "", url, session_name)
 
 def start_record(url, session_name, quiet, background):
     info("Start fwa record")

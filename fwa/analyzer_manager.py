@@ -23,6 +23,16 @@ class Observation(TypedDict):
     payload_type: str
     observations: list
     
+def _prepare_analyzers(analyzers):
+    for a in analyzers:
+        module_name = a.replace(".py", "")
+        # print(module_name)
+        module = importlib.import_module("fwa.analyzers.{}".format(module_name))
+        if hasattr(module, "setup"):
+            ret = module.setup()
+            return ret
+
+
 
 def _get_analyzers(analyzers_path):
     analyzers = []
@@ -94,6 +104,7 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
         analyzers_path (str): The path
     """
     analyzers = _get_analyzers(analyzers_path)
+    _prepare_analyzers(analyzers)
     # list<entry, <fuzz_strings_per_entry>
     fuzz_entries : list[HarFuzzEntries] = get_fuzz_entries(har.get_entries(helper.fwa_session(session_name)), har.get_fuzz_entries(helper.fwa_session(fuzz_session_name), payloads))
     csv_entries = []
@@ -105,7 +116,6 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
         single_fuzz_observations = []
         for single_fuzz_entry in all_fuzz_entries:
             used_payload = single_fuzz_entry['payload']
-            print(used_payload)
             if used_payload:
                 o = {}
                 o['url'] = fe['url']

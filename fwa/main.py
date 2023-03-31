@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Optional
 from fwa import oracle_manager
-from fwa.utils import helper, payloads
+from fwa.utils import helper, payloads, webserver
 from fwa.utils.helper import FWA_PREFIX, fwa_default_analyzers_path, fwa_init, fwa_list_sessions, fwa_package_path, fwa_session
 from fwa.utils import mitm
 import typer
@@ -75,12 +75,15 @@ def analyze(session_name: str = typer.Argument(..., help="The base session name"
         analyzers (_type_, optional): _description_. Defaults to typer.Option("", help="The analyzers' folder").
         output (_type_, optional): _description_. Defaults to typer.Option('observations.csv', help="Detected observations").
     """
+    fwa_init()
     if not fuzz_session_name: 
         fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     if not analyzers: 
         analyzers = fwa_default_analyzers_path()
     ploads = payloads.load(payload_file)
+    webserver.start_webserver()
     am.run(session_name, fuzz_session_name, analyzers, ploads, "observations.csv")
+    webserver.stop_webserver()
 
 @typer_app.command()
 def oracle(observation_file: str = typer.Argument(..., help="The observation file"), rules_path: Optional[str] = typer.Argument("", help="The path containing the list of Oracle rules") ):

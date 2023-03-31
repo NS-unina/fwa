@@ -6,9 +6,10 @@ from pathlib import Path
 import sys
 import time
 import logging
-from fwa.utils import mitm
+from fwa.utils import mitm, webserver
 
 # LOGGIN
+
 
 class CustomFormatter(logging.Formatter):
 
@@ -104,6 +105,8 @@ def fwa_session(session_name):
 
 def fwa_init():
     os.makedirs(os.path.join(home(), ".fwa", "sessions"), 0o775, True)
+    # Static web-server for listening
+    os.makedirs(webserver.get_webserver_path(), 0o775, True)
     # os.makedirs(os.path.join(home(), ".fwa", "fuzz-sessions"), 0o775, True)
 
     

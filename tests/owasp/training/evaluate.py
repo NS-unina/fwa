@@ -91,7 +91,7 @@ def is_vulnerability(related_to_test_case):
 
 
 
-def get_sql_stats():
+def _get_stats(cat, fwa_cat):
     no_tp = 0 
     no_tn = 0 
     no_fp = 0
@@ -101,14 +101,14 @@ def get_sql_stats():
     false_positive_cases: list = []
     false_negative_cases: list = []
     # Navigate true positive
-    owasp_sql_true = get_true_cases('sqli')
-    owasp_sql_false = get_false_cases('sqli')
+    owasp_sql_true = get_true_cases(cat)
+    owasp_sql_false = get_false_cases(cat)
 
 
-    fwa_sql = get_fwa_cat('sql')
+    fwa_sql = get_fwa_cat(fwa_cat)
     for i,r in owasp_sql_true.iterrows():
         test_name = r[COL_TESTNAME]
-        related_to_test_case = find_fwa_related_to_test_case('sql', test_name)
+        related_to_test_case = find_fwa_related_to_test_case(fwa_cat, test_name)
         if is_vulnerability(related_to_test_case):
                 print("[+] Correct vulnerability for {}".format(test_name))
                 no_tp = no_tp + 1
@@ -122,7 +122,7 @@ def get_sql_stats():
     for i,r in owasp_sql_false.iterrows():
         # If properly classified with 
         test_name = r[COL_TESTNAME]
-        related_to_test_case = find_fwa_related_to_test_case('sql', test_name)
+        related_to_test_case = find_fwa_related_to_test_case(fwa_cat, test_name)
         # When is false is ok
         if not is_vulnerability(related_to_test_case):
                 print("[+] Correct non vulnerability for {}".format(test_name))
@@ -134,6 +134,7 @@ def get_sql_stats():
                 false_positive_cases.append(test_name)
     cm = ConfusionMatrix(no_tp, no_tn, no_fp, no_fn)
     stats = cm.stats()
+    stats['type'] = cat
     cases : Cases = {}
     cases['true_positive_cases'] = true_positive_cases
     cases['true_negative_cases'] = true_negative_cases
@@ -142,6 +143,11 @@ def get_sql_stats():
 
     return stats, cases
 
+def get_sql_stats():
+    return _get_stats('sqli', 'sql')
+
+def get_xss_stats():
+    return _get_stats('xss', 'xss')
 
 
 
@@ -174,27 +180,10 @@ def prepare_lines_for_test_cases(cases: Cases):
 
 if __name__ == '__main__':
     # column_headers = df_owasp.columns.values.tolist()
-    stats, cases = get_sql_stats()
-    print(stats)
+    stats, cases = get_xss_stats()
     prepare_lines_for_test_cases(cases)
-    e()
 
     with open('stats.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=stats.keys())
         writer.writeheader()
         writer.writerow(stats)
-
-    
-
-
-
-
-    owasp_sql_true = get_true_cases('sqli')
-    owasp_sql_false = get_false_cases('sqli')
-
-    # for i, r in fwa_sql.iterrows():
-
-
-
-
-
