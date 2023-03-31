@@ -62,7 +62,7 @@ The command receives the observations_file and detects vulnerabilities through t
 fwa oracle  <observation file>
 ```
 
-## Examples
+## Training with OWASP
 
 ### Use against the owasp benchmark   
 1. Run `fwa list` to initialize the project. 
@@ -72,6 +72,22 @@ cp tests/owasp/* ~/.fwa/sessions
  ```
 
 
+### How to intercept OWASP sessions?   
+1. Run the OWASP benchmark 
+```
+cd tests/owasp/vm 
+make run-benchmark
+```
+
+2. Setup the `fwa recorder` in order to intercept only the required requests. For example, for `XSS`: 
+``` 
+fwa record https://127.0.0.1:8443/benchmark/xss owasp-xss 
+```
+
+3. Run the `BenchmarkUtils` script: 
+``` 
+bash runCrawler.sh 127.0.0.1 8080 
+``` 
 
 
 
