@@ -1,13 +1,11 @@
-
-
-# name: extract_har.py
-# The following script extracts a list of requests on the basis of an har file
-#
-#
 import json
 import sys
 from typing import TypedDict
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
+
+def e():
+    sys.exit(-1)
+
 
 def parse_url(url):
     parsed_url = urlparse(url)
@@ -105,23 +103,3 @@ def change_entries(har_file, new_entries, output_file="output.har"):
         data['log']['entries'] = new_entries
     with open(output_file, 'w') as nf:
         json.dump(data, nf, ensure_ascii = False, indent=4)
-
-
-def read_list():
-    with open('list.txt') as f: 
-        data = f.readlines()
-    return [d.replace("\n", "") for d in data]
-
-def e():
-    sys.exit(-1)
-if __name__ == '__main__' :
-    har_file = "owasp-sqli.har"
-    har_entries : list[HarEntry]= get_entries(har_file) 
-
-    list_new : list[HarEntry] = []
-    for l in read_list():
-        uh = get_entries_by_content(l, har_entries)
-        if len(uh) > 0:
-            list_new = list_new + uh
-    change_entries(har_file, list_new)
-
