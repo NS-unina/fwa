@@ -27,6 +27,10 @@ straightforward as possible.
 ### Added 
 * Simple web server capability
 * Added phantomjs capability for XSS detection
+* Added CMDI fuzzing 
+
+### Fixed 
+* List only takes files that end with har
 
 ## [0.1.2]
 ### Added 

@@ -88,7 +88,7 @@ def fwa_default_analyzers_path():
 def get_files(path):
     files = []
     for file in os.listdir(path):
-        if os.path.isfile(os.path.join(path, file)):
+        if os.path.isfile(os.path.join(path, file)) and file.endswith("har"):
             files.append(file)
     return [f.replace(".har", "") for f in files]
 
