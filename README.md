@@ -81,7 +81,7 @@ make run-benchmark
 
 2. Setup the `fwa recorder` in order to intercept only the required requests. For example, for `XSS`: 
 ``` 
-fwa record https://127.0.0.1:8443/benchmark/xss owasp-xss 
+fwa record https://localhost:8443/benchmark/xss owasp-xss 
 ```
 
 3. Run the `BenchmarkUtils` script: 
@@ -89,6 +89,12 @@ fwa record https://127.0.0.1:8443/benchmark/xss owasp-xss
 bash runCrawler.sh 127.0.0.1 8080 
 ``` 
 
+You can evaluate if all the requests are properly acquired with the `list_entries.py` script.
+```
+python list_entries.py ~/.fwa/sessions/owasp-lfi.har
+=> The file contains 268 entries
+# Right, according to https://owasp.org/www-project-benchmark/
+```
 
 
 ## Development   

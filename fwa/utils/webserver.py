@@ -5,7 +5,7 @@ from mitmproxy import ctx
 
 # This module starts a static webserver useful for several purposes
 
-HTTP_SERVER_PORT = 18080
+HTTP_SERVER_PORT = 18081
 
 def get_webserver_path():
     return os.path.join(helper.home(), ".fwa", "static-webserver")

@@ -83,10 +83,10 @@ def find_fwa_related_to_test_case(cat, test_case):
     return ret
 
 def is_vulnerability(related_to_test_case):
-        for r in related_to_test_case:
-            if r['is_present']:
-                return True
-        return False
+    for r in related_to_test_case:
+        if r['is_present'] == 'True' or int(r['is_present']) == 1:
+            return True
+    return False
 
 
 
@@ -114,7 +114,7 @@ def _get_stats(cat, fwa_cat):
                 no_tp = no_tp + 1
                 true_positive_cases.append(test_name)
         else:
-            print("[-] Incorrect vulnerability for {}".format(test_name))
+            print("[-] Vuln not found for {}".format(test_name))
             no_fn = no_fn + 1
             false_negative_cases.append(test_name)
             
@@ -123,13 +123,14 @@ def _get_stats(cat, fwa_cat):
         # If properly classified with 
         test_name = r[COL_TESTNAME]
         related_to_test_case = find_fwa_related_to_test_case(fwa_cat, test_name)
+
         # When is false is ok
         if not is_vulnerability(related_to_test_case):
                 print("[+] Correct non vulnerability for {}".format(test_name))
                 no_tn = no_tn + 1
                 true_negative_cases.append(test_name)
         else:
-                print("[+] Incorrect non vulnerability for {}".format(test_name))
+                print("[-] False positive for {}".format(test_name))
                 no_fp = no_fp + 1
                 false_positive_cases.append(test_name)
     cm = ConfusionMatrix(no_tp, no_tn, no_fp, no_fn)
@@ -176,12 +177,25 @@ def prepare_lines_for_test_cases(cases: Cases):
         f.writelines(to_write)
 
 
+"""
+ OWASP CATS: 
+    pathtraver
+"""
 
+def usage():
+     print("[+] usage: {} owasp_cat fwa_cat".format(sys.argv[0]))
+     exit(-1)
 
 if __name__ == '__main__':
     # column_headers = df_owasp.columns.values.tolist()
-    stats, cases = get_xss_stats()
+    if len(sys.argv) < 2: 
+         usage()
+    owasp_cat = sys.argv[1]
+    fwa_cat = sys.argv[2]
+
+    stats, cases = _get_stats(owasp_cat, fwa_cat)
     prepare_lines_for_test_cases(cases)
+    print(stats)
 
     with open('stats.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=stats.keys())

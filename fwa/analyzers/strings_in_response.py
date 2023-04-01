@@ -11,7 +11,13 @@ KEYWORDS =  [
     "groups=",
     "Permission denied",
     "whoami",
-    "root:",
+    "root",
+    "echo",
+    # SHA of FWA WORD
+    "a2cf52ff63502c5869b2813af3f455b6d0c00b0a",
+    # "root:",
+    "sbin",
+    # "sbin:",
     "daemon:",
     "error",
     "exception",
@@ -35,7 +41,8 @@ KEYWORDS =  [
 
 
 def clean(s):
-    return re.sub(r'\W+', '', s)
+    return s
+    # return re.sub(r'\W+', '', s)
 
 def keywords_search(html, suffix = "_in_response"):
     """

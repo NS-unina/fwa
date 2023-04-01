@@ -12,7 +12,7 @@ page.onAlert = function(msg) {
     }
 }
 
-page.open('http://127.0.0.1:18080/xss.html', function(status) {
+page.open('http://127.0.0.1:18081/xss.html', function(status) {
     phantom.exit()
 
 })

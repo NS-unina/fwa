@@ -153,8 +153,6 @@ def send_request(req : Request, proxy = None):
             if req.method == "POST":
                 # Fix header 
                 req.headers['Content-Type'] = "application/x-www-form-urlencoded"
-                if req.url == "https://localhost:8443/benchmark/sqli-00/BenchmarkTest00037":
-                    print(helper.create_query_string(req.body))
                 resp = requests.post(req.url, cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = helper.create_query_string(req.body), headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
                 # json dumps to avoid encoding
             else:
@@ -178,8 +176,7 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     requests = HarParser.from_file(har_file)
     fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
     # Quiet mode
-    # mitm.start_record(fuzz_session_name, True, True)
-    mitm.start_record("*", fuzz_session_name, False, True)
+    mitm.start_record("*", fuzz_session_name, True, True)
     payloads = p.payloads(p.load(payload_file))
     fuzz_reqs = []
     flows = []

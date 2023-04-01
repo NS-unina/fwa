@@ -1,4 +1,4 @@
-LIMA_OPTS := --set='.cpus = 2 | .memory = "2GiB" '
+LIMA_OPTS := --set='.cpus = 2 | .memory = "2GiB" | .mount = []'
 
 list: 
 	limactl list

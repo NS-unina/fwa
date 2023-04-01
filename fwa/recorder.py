@@ -260,7 +260,7 @@ def load(loader: addonmanager.Loader):
     loader.add_option(
         name="url",
         typespec=str,
-        default="http://127.0.0.1:18080/wavsep",
+        default="http://127.0.0.1:{}/wavsep".format(helper.webserver.HTTP_SERVER_PORT),
         help="Add a target url",
     )
 
