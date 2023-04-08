@@ -55,13 +55,14 @@ def fuzz(session_name: str = typer.Argument(..., help="The session name, taken f
     querystring: bool = typer.Option(False, help="If set, fuzz the params in the query string"),
     body: bool = typer.Option(False, help="If set, fuzz the params in the body "),
     headers: bool = typer.Option(False, help="If set, fuzz the headers"),
+    threads: int = typer.Option(1, help="The number of threads")
     ):
     """ 
     Fuzz a session obtained with the record command
     """
     if session_name not in fwa_list_sessions():
         helper.err("Session \"{}\" not found, run \"fwa list\" to show availabe sessions.".format(session_name))
-    fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers)
+    fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers, threads)
 
 
 @typer_app.command()

@@ -4,11 +4,11 @@ fwa="poetry run fwa"
 
 PAYLOAD_PATH=../payloads/xss.csv
 SESSION=owasp-xss
-# $fwa fuzz $SESSION --payload-file=${PAYLOAD_PATH} --querystring --body
-
+$fwa fuzz $SESSION --payload-file=${PAYLOAD_PATH}  --threads 50
+sleep 1
 # # Generate an observations.csv file
 # $fwa analyze $SESSION fwa-${SESSION} $PAYLOAD_PATH
-$fwa oracle observations.csv
+# $fwa oracle observations.csv
 
 
 

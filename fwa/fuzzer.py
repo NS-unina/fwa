@@ -1,4 +1,6 @@
+from queue import Queue
 import sys
+from threading import Thread
 from time import sleep
 from copy import deepcopy
 from datetime import datetime
@@ -19,6 +21,25 @@ urllib3.disable_warnings()
 # Usually ping sleep payload are about 30 seconds
 DEFAULT_TIMEOUT = 50
 MITM_PROXY = "127.0.0.1:8080"
+q = Queue()
+# Global progress bar
+pb = None
+current_req = 0
+
+def send_fuzz_requests():
+    """ The following method runs the fuzz request by using threads
+    """
+    global q 
+    global current_req 
+    while True:
+        fuzz_req = q.get()
+
+        resp = send_request(fuzz_req, MITM_PROXY)
+        current_req = current_req + 1
+        pb.print(current_req)
+        q.task_done()
+
+
 
 methods = {
     "GET": requests.get,
@@ -171,7 +192,8 @@ def send_from_har(session_name : str, proxy):
         # print("Send {}".format(r.url))
         send_request(r, proxy)
 
-def fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers):
+def fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers, threads):
+    global pb
     har_file = fwa_session(session_name)
     requests = HarParser.from_file(har_file)
     fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
@@ -185,6 +207,7 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
     r : Request
     if fuzz_all([querystring, body, cookies, headers]):
             helper.info("Fuzz everything")
+    helper.info("Num of threads: {}".format(threads))
     for r  in requests:
         ### FD
         # IF all set to false (default), fuzz everything
@@ -222,16 +245,26 @@ def fuzz_from_har(session_name, payload_file, querystring, body, cookies, header
                 fuzz_reqs.extend(h_reqs)
 
     print("Fuzz reqs {}".format(len(fuzz_reqs)))
-    i = 0
     # Wait the start of the mitmproxy
     sleep(1)
-    pb = ProgressBar(len(fuzz_reqs))
-    for r  in fuzz_reqs:
-        print("Req {} - ".format(i))
-        resp = send_request(r, MITM_PROXY)
-        i = i + 1
-        pb.print(i)
+    for f in fuzz_reqs: 
+        q.put(f)
+
+    for t in range(threads):
+        worker = Thread(target = send_fuzz_requests)
+        worker.daemon = True 
+        worker.start()
     
+
+    pb = ProgressBar(len(fuzz_reqs))
+    # for r  in fuzz_reqs:
+    #     print("Req {} - ".format(i))
+    #     resp = send_request(r, MITM_PROXY)
+    #     i = i + 1
+    #     pb.print(i)
+    # All threads are completed 
+    q.join()
+    print("[+] Fuzz completed")
     mitm.stop_record()
 
     

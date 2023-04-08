@@ -13,7 +13,7 @@ In development mode, install deps with: `poetry install`, then use with `poetry 
 ### Record
 Records a new session: 
 ```   
-fwa records <session name>
+fwa record <session name>
 ``` 
 it starts a proxy on `127.0.0.1:8080`   
 By default, the session will run in `interactive` mode. You can stop it with `ctrl+C` . 
