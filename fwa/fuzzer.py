@@ -18,6 +18,7 @@ import urllib3
 from fwa.utils.helper import FWA_PREFIX, ProgressBar, fuzz_all, fwa_session, to_dict
 urllib3.disable_warnings()
 
+
 # Usually ping sleep payload are about 30 seconds
 DEFAULT_TIMEOUT = 50
 MITM_PROXY = "127.0.0.1:8080"
