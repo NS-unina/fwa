@@ -1,28 +1,24 @@
+from logging import info
+from fwa.utils import helper
 import os
 from mitmproxy import ctx
-import logging
 
-logger = logging.getLogger('fwa')
-logger.setLevel(logging.INFO)
-
-
-def info(msg):
-    logger.info(msg) 
 
 
 def recorder_script():
-    return os.path.join("fwa", "recorder.py")
+    return os.path.join(helper.get_project_root(), "recorder.py")
 
-def mitm_cmd(session_name, quiet = False):
-    return "mitmdump -s {} {} -k --set session={}".format(recorder_script(), "-q" if quiet else "", session_name)
+def mitm_cmd(url, session_name, quiet = False):
+    return "mitmdump -s {} {} -k --set validate_inbound_headers=false --set url={}  --set session={}".format(recorder_script(), "-q" if quiet else "", url, session_name)
 
-def start_record(session_name, quiet, background):
+def start_record(url, session_name, quiet, background):
     info("Start fwa record")
     if background:
-        os.system(mitm_cmd(session_name, quiet) + " &")
+        print(mitm_cmd(url, session_name, quiet) + " &")
+        os.system(mitm_cmd(url, session_name, quiet) + " &")
 
     else:
-        os.system(mitm_cmd(session_name, quiet))
+        os.system(mitm_cmd(url, session_name, quiet))
 
 
 def stop_record():

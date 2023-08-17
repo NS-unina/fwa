@@ -1,4 +1,5 @@
 import json
+from fwa.utils import helper
 from utils.helper import fwa_session_path, iso_time_from_timestamp
 import mitmproxy
 from mitmproxy import http
@@ -11,7 +12,6 @@ from mitmproxy.net.http import cookies
 from mitmproxy.utils import strutils
 import base64
 import json
-import logging
 import os
 import zlib
 
@@ -156,7 +156,8 @@ def flow_entry(flow: mitmproxy.http.HTTPFlow) -> dict:
     if flow.server_conn.connected:
         entry["serverIPAddress"] = str(flow.server_conn.peername[0])
 
-    HAR["log"]["entries"].append(entry)
+    if ctx.options.url is "*" or ctx.options.url in flow.request.pretty_url:
+        HAR["log"]["entries"].append(entry)
 
     return entry
 
@@ -205,9 +206,10 @@ def done():
     # if ctx.options.hardump.endswith(".zhar"):
     #     raw = zlib.compress(raw, 9)
 
-    with open(os.path.join(fwa_session_path(), "{}.har".format(name)), "wb") as f:
+    final_file = os.path.join(fwa_session_path(), "{}.har".format(name))
+    with open(final_file, "wb") as f:
         f.write(raw)
-        logging.info("HAR dump finished (wrote %s bytes to file)" % len(json_dump))
+        helper.info("HAR dump finished (wrote %s bytes to {})".format(len(json_dump), final_file))
 
 
 def format_cookies(cookie_list):
@@ -258,7 +260,7 @@ def load(loader: addonmanager.Loader):
     loader.add_option(
         name="url",
         typespec=str,
-        default="http://127.0.0.1:18080/wavsep",
+        default="http://127.0.0.1:{}/wavsep".format(helper.webserver.HTTP_SERVER_PORT),
         help="Add a target url",
     )
 

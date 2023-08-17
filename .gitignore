@@ -131,3 +131,7 @@ dmypy.json
 
 *.csv
 !payloads.csv
+
+log.txt
+
+observations.csv
