@@ -1,3 +1,6 @@
+from queue import Queue
+import sys
+from threading import Thread
 from time import sleep
 from copy import deepcopy
 from datetime import datetime
@@ -12,11 +15,32 @@ import requests
 # Disable warning ssl
 import urllib3
 
-from fwa.utils.helper import ProgressBar, fwa_session, to_dict
+from fwa.utils.helper import FWA_PREFIX, ProgressBar, fuzz_all, fwa_session, to_dict
 urllib3.disable_warnings()
 
-DEFAULT_TIMEOUT = 2
+
+# Usually ping sleep payload are about 30 seconds
+DEFAULT_TIMEOUT = 50
 MITM_PROXY = "127.0.0.1:8080"
+q = Queue()
+# Global progress bar
+pb = None
+current_req = 0
+
+def send_fuzz_requests():
+    """ The following method runs the fuzz request by using threads
+    """
+    global q 
+    global current_req 
+    while True:
+        fuzz_req = q.get()
+
+        resp = send_request(fuzz_req, MITM_PROXY)
+        current_req = current_req + 1
+        pb.print(current_req)
+        q.task_done()
+
+
 
 methods = {
     "GET": requests.get,
@@ -41,8 +65,12 @@ class Request:
         self.headers = to_dict(headers)
         self.body = body
 
+
+
     def complete_url(self):
-        return self.url + "?" + urlencode(self.query_params)
+        # return self.url + "?" + urlencode(self.query_params)
+        # To avoid invalid urlencode conditions
+        return self.url + "?" + helper.create_query_string(self.query_params)
     
     def parse_url(self, url):
         parsed_url = urlparse(url)
@@ -81,6 +109,17 @@ class Request:
                 getattr(r, attribute)[n] = quote(p)
                 reqs.append(r)
 
+        # Add also parameters 
+        for n in names:
+            for p in payloads: 
+                r = deepcopy(self)
+                val = getattr(r, attribute)[n]
+                del getattr(r, attribute)[n]
+                getattr(r, attribute)[quote(p)] = val
+                # Remove previous attribute
+                reqs.append(r)
+
+
         return reqs
 
 
@@ -99,11 +138,6 @@ class Request:
         """
         query = self.query_url()
         return list(query.keys())
-
-# class HarEntry:
-
-    
-
 
 class HarParser:
     def from_file(har_file):
@@ -127,7 +161,7 @@ class HarParser:
 json_obj = []
 
 
-def send_request(req, proxy = None):
+def send_request(req : Request, proxy = None):
     req_function = methods[req.method]
     the_url = urlparse(req.url).scheme
     try:
@@ -135,11 +169,16 @@ def send_request(req, proxy = None):
             print("[-] Invalid scheme protocol: {}".format(the_url))
         else:
             req.timestamp_start = helper.timestamp()
+            if 'Cookie' in req.headers.keys():
+                del req.headers['Cookie']
 
             if req.method == "POST":
-                resp = requests.post(req.complete_url() , proxies = {"http" : proxy, "https" : proxy}, verify = False, data = req.body, headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
+                # Fix header 
+                req.headers['Content-Type'] = "application/x-www-form-urlencoded"
+                resp = requests.post(req.url, cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, data = helper.create_query_string(req.body), headers = req.headers, allow_redirects=False, timeout=DEFAULT_TIMEOUT)
+                # json dumps to avoid encoding
             else:
-                resp = req_function(req.complete_url(), proxies = {"http" : proxy, "https" : proxy}, verify = False, headers = req.headers, allow_redirects= False, timeout=DEFAULT_TIMEOUT)
+                resp = req_function(req.complete_url(), cookies = req.cookies, proxies = {"http" : proxy, "https" : proxy}, verify = False, headers = req.headers, allow_redirects= False, timeout=DEFAULT_TIMEOUT)
             req.timestamp_end = helper.timestamp()
             return resp
     except requests.exceptions.ReadTimeout:
@@ -154,41 +193,84 @@ def send_from_har(session_name : str, proxy):
         # print("Send {}".format(r.url))
         send_request(r, proxy)
 
-def fuzz_from_har(session_name, payload_file):
+def fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers, threads):
+    global pb
     har_file = fwa_session(session_name)
     requests = HarParser.from_file(har_file)
-    fuzz_session_name = "fwa-{}".format(session_name)
-    mitm.start_record(fuzz_session_name, False, True)
+    fuzz_session_name = "{}{}".format(FWA_PREFIX, session_name)
+    # Quiet mode
+    mitm.start_record("*", fuzz_session_name, True, True)
     payloads = p.payloads(p.load(payload_file))
     fuzz_reqs = []
     flows = []
+    print(helper.get_project_root())
     print("Reqs no: {}".format(len(requests)))
-    for r in requests:
-        q_reqs = r.get_fuzz_reqs("query_params", payloads)
+    r : Request
+    if fuzz_all([querystring, body, cookies, headers]):
+            helper.info("Fuzz everything")
+    helper.info("Num of threads: {}".format(threads))
+    for r  in requests:
         ### FD
-        # c_reqs = r.get_fuzz_reqs("cookies", payloads)
-        h_reqs = r.get_fuzz_reqs("headers", payloads)
-        # b_reqs = r.get_fuzz_reqs("body", payloads)
-        # fuzz_reqs.extend(q_reqs)
-        # fuzz_reqs.extend(c_reqs)
-        fuzz_reqs.extend(h_reqs)
-        # fuzz_reqs.extend(b_reqs)
+        # IF all set to false (default), fuzz everything
+        # print(fuzz_all([querystring, body, cookies, headers]))
+        if fuzz_all([querystring, body, cookies, headers]):
+            q_reqs = r.get_fuzz_reqs("query_params", payloads)
+            c_reqs = r.get_fuzz_reqs("cookies", payloads)
+            h_reqs = r.get_fuzz_reqs("headers", payloads)
+            b_reqs = r.get_fuzz_reqs("body", payloads)
+            fuzz_reqs.extend(q_reqs)
+            fuzz_reqs.extend(c_reqs)
+            fuzz_reqs.extend(h_reqs)
+            fuzz_reqs.extend(b_reqs)
+
+        # Conditional fuzzing
+        else:
+            if querystring: 
+                helper.info("Fuzz querystring")
+                q_reqs = r.get_fuzz_reqs("query_params", payloads)
+                fuzz_reqs.extend(q_reqs)
+            if body:
+                helper.info("Fuzz body")
+                b_reqs = r.get_fuzz_reqs("body", payloads)
+
+
+
+                fuzz_reqs.extend(b_reqs)
+            if cookies: 
+                helper.info("Fuzz cookies")
+                c_reqs = r.get_fuzz_reqs("cookies", payloads)
+                fuzz_reqs.extend(c_reqs)
+            if headers: 
+                helper.info("Fuzz headers")
+                h_reqs = r.get_fuzz_reqs("headers", payloads)
+                fuzz_reqs.extend(h_reqs)
+
     print("Fuzz reqs {}".format(len(fuzz_reqs)))
-    i = 0
     # Wait the start of the mitmproxy
     sleep(1)
-    pb = ProgressBar(len(fuzz_reqs))
-    for r in fuzz_reqs:
-        print("Req {} - ".format(i))
-        resp = send_request(r, MITM_PROXY)
-        i = i + 1
-        pb.print(i)
+    for f in fuzz_reqs: 
+        q.put(f)
+
+    for t in range(threads):
+        worker = Thread(target = send_fuzz_requests)
+        worker.daemon = True 
+        worker.start()
     
+
+    pb = ProgressBar(len(fuzz_reqs))
+    # for r  in fuzz_reqs:
+    #     print("Req {} - ".format(i))
+    #     resp = send_request(r, MITM_PROXY)
+    #     i = i + 1
+    #     pb.print(i)
+    # All threads are completed 
+    q.join()
+    print("[+] Fuzz completed")
     mitm.stop_record()
 
     
 
-def print_from_har(har_file, proxy):
+def print_from_har(har_file, ):
     requests = HarParser.from_file(har_file)
     for r in requests:
         print(r.complete_url())

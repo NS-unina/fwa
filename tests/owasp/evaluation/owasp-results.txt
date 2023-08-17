@@ -1,0 +1,47 @@
+	Forza	Progresso	Trascorso	Richieste	Avvisi	Stato
+Analizzatore			00:00.603	41		
+						
+Plugin						
+Path Traversal	Medio	100	10:50.710	73551	45	Completato
+Remote File Inclusion	Medio	100	18:18.291	48630	0	Completato
+Divulgazione di codice sorgente - cartella /WEB-INF	Medio	100	00:00.125	3	0	Completato
+Heartbleed OpenSSL Vulnerability	Medio	100	00:03.161	3	0	Completato
+Source Code Disclosure - CVE-2012-1823	Medio	100	06:17.958	2655	0	Completato
+Remote Code Execution - CVE-2012-1823	Medio	100	09:42.977	5562	0	Completato
+External Redirect	Medio	100	21:05.586	43767	0	Completato
+Server Side Include	Medio	100	15:25.341	19452	0	Completato
+Cross Site Scripting (Reflected)	Medio	100	20:33.059	25291	137	Completato
+Cross Site Scripting (Persistent) - Prime	Medio	100	11:38.244	4863	0	Completato
+Cross Site Scripting (Persistent) - Spider	Medio	100	11:20.850	2780	0	Completato
+Cross Site Scripting (Persistent)	Medio	100	04:40.174	0	0	Completato
+SQL Injection	Medio	100	39:48.770	116603	177	Completato
+SQL Injection - MySQL	Medio	100	23:39.988	34041	0	Completato
+SQL Injection - Hypersonic SQL	Medio	100	32:59.854	29052	93	Completato
+SQL Injection - Oracle	Medio	100	27:34.986	29176	0	Completato
+SQL Injection - PostgreSQL	Medio	100	55:26.103	29154	0	Completato
+SQL Injection - SQLite	Medio	100	27:40.278	39433	0	Completato
+Cross Site Scripting (Basato su DOM)	Medio	100	00:06.298	0	0	Saltato. failed to start or connect to the browser.
+SQL Injection - MsSQL	Medio	100	17:22.016	18563	0	Completato
+Server Side Code Injection	Medio	100	41:28.431	38903	0	Completato
+Remote OS Command Injection	Medio	100	75:58.207	167947	68	Completato
+XML External Entity Attack	Medio	100	00:04.773	0	0	Completato
+Generic Padding Oracle	Medio	100	04:40.371	0	0	Completato
+Cloud Metadata Potentially Exposed	Medio	100	00:00.010	4	0	Completato
+Directory Browsing	Medio	100	07:56.984	2781	0	Completato
+Buffer Overflow	Medio	100	10:55.787	4698	83	Completato
+Errore nella formattazione della stringa	Medio	100	16:25.862	13972	97	Completato
+CRLF Injection	Medio	100	28:00.270	34018	0	Completato
+Parameter Tampering	Medio	100	45:24.389	32869	0	Completato
+ELMAH Information Leak	Medio	100	00:00.339	1	0	Completato
+Trace.axd Information Leak	Medio	100	00:25.595	42	0	Completato
+.htaccess Information Leak	Medio	100	00:13.049	42	0	Completato
+.env Information Leak	Medio	100	00:36.763	42	0	Completato
+Hidden File Finder	Medio	100	00:06.865	48	0	Completato
+XSLT Injection	Medio	100	28:23.628	26735	156	Completato
+GET for POST	Medio	100	08:45.573	2184	1510	Completato
+User Agent Fuzzer	Medio	100	20:16.478	33372	6896	Completato
+Script per le regole di scansione attiva	Medio	100	00:00.001	0	0	Saltato. nessuno script attivo.
+Azione di spoofing SOAP	Medio	100	00:02.017	0	0	Completato
+Iniezione SOAP XML	Medio	100	04:42.632	0	0	Completato
+						
+Totale			648:59.552	881672	9263	
