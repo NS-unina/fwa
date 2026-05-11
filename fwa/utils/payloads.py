@@ -18,7 +18,7 @@ def load(csv_file) -> list[Payload]:
     rows = []
     i = 0
     with open(csv_file) as f: 
-        csv_reader = csv.DictReader(f)
+        csv_reader = csv.DictReader(f, fieldnames=None, quoting=csv.QUOTE_NONE)
         for r in csv_reader: 
             if i == 0:
                 pass

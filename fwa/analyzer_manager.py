@@ -53,6 +53,17 @@ def _run_analyzer(filename, valid_entry, fuzz_entry):
         helper.warn("{} does not contain analyze and header function".format(module_name))
         return {}
 
+def _run_multiple_analyzers(filename, url, fuzz_entries):
+    module_name = filename.replace(".py", "")
+    # print(module_name)
+    module = importlib.import_module("fwa.analyzers.{}".format(module_name))
+    if hasattr(module, "analyze_multiple"):
+        ret = module.analyze_multiple(url, fuzz_entries)
+        return ret
+    else: 
+        # helper.warn("{} does not contain analyze and header function".format(module_name))
+        return {}
+
 # def _get_header(filename):
 #     module_name = filename.replace(".py", "")
 #     module = importlib.import_module("fwa.analyzers.{}".format(module_name))
@@ -114,6 +125,7 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
         all_fuzz_entries = fe['fuzzEntries']
         # Observations for a single url
         single_fuzz_observations = []
+        # Single Analyzers
         for single_fuzz_entry in all_fuzz_entries:
             used_payload = single_fuzz_entry['payload']
             if used_payload:
@@ -123,12 +135,30 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
                 o['payload_type']  = used_payload['type']
                 o['payload'] = used_payload['value']
                 for a in analyzers: 
+                    # Returns a dict of observations
                     observations = _run_analyzer(a, valid_entry, single_fuzz_entry)
                     o.update(observations)
                 csv_entries.append(o)
         
+        # Multiple analyzers 
+        multiple_observations = []
+        for a in analyzers:
+            observation = _run_multiple_analyzers(a, fe['url'], all_fuzz_entries)
+            if observation:
+                multiple_observations.append(observation)
+            # for o in multiple_observations:
+            #     csv_entries.append(o) 
 
 
+    print(multiple_observations)
+    for c in csv_entries:
+        url = c['url']
+        fuzzed_param = c['fuzzed_param'] 
+        payload = c['payload'] 
+        for o in multiple_observations:
+            if url == o['url'] and fuzzed_param == o['fuzzed_param'] and payload == c['payload']:
+                print("Update with multiple observations")
+                c.update(o['observations'])
     write_analyzers(results_file, csv_entries)
     helper.info("Write results in {}".format(results_file))
                     # o[header] = observation

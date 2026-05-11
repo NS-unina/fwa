@@ -20,7 +20,7 @@ urllib3.disable_warnings()
 
 
 # Usually ping sleep payload are about 30 seconds
-DEFAULT_TIMEOUT = 50
+DEFAULT_TIMEOUT = 4
 MITM_PROXY = "127.0.0.1:8080"
 q = Queue()
 # Global progress bar

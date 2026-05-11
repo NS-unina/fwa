@@ -1,0 +1,178 @@
+import os
+from pathlib import Path
+import subprocess
+
+# xss_phantomjs_script= """
+# var webpage = require('webpage');
+# var system = require('system');
+# const webroot = 'http://127.0.0.1:18081';
+# const fs = require('fs');
+# const EOL = system.os.name == 'windows' ? \"\\r\\n\" : \"\\n\";
+
+# function get_url(name) {
+# 	return webroot + "/" + name;
+# }
+
+# var system = require('system');
+# var args = system.args;
+# const filename = system.args[1];
+
+# const content = fs.read(filename);
+# if (content) {
+# 	var lines = content.split(EOL);
+# }
+# const urlsToOpen = lines.map(function (l) { return get_url(l); });
+
+# var pagesLoaded = 0;
+# function openNextPage() {
+#     if (urlsToOpen.length === 0) {
+#         phantom.exit();
+#         return;
+#     }
+#     var url = urlsToOpen.shift();
+#     // console.log('Opening:', url);
+#     var page = webpage.create();
+# 		page.onAlert = function(msg) {
+# 			if (msg == "1") {
+# 					console.log(url + ",VULNERABLE")
+# 				}
+# 		}
+#     page.open(url, function(status) {
+#         if (status === 'success') {
+#             // console.log('Loaded:', url);
+#         } else {
+#             console.error('Failed to load:', url);
+#         }
+#         page.close();
+#         pagesLoaded++;
+#         if (pagesLoaded === urlsToOpen.length) {
+#             phantom.exit();
+#         } else {
+#             openNextPage();
+#         }
+#     });
+# }
+# openNextPage();
+# """
+xss_phantomjs_script= """
+var webPage = require('webpage');
+var page = webPage.create();
+
+page.onAlert = function(msg) {
+    if (msg == "1") {
+        console.log("VULNERABLE")
+    }
+}
+
+page.open('http://127.0.0.1:18081/xss.html', function(status) {
+    phantom.exit()
+
+})
+"""
+
+
+def extract_page_name(url):
+    # Remove the protocol and domain part
+    path = url.split("/")[-1]
+
+    # Remove the extension (if exists)
+    filename_parts = path.split(".")
+    if len(filename_parts) > 1:
+        filename_parts.pop()  # Remove the extension
+
+    # Join the filename parts back together
+    case_name = "-".join(filename_parts)
+
+    return case_name
+
+def get_index_case(data):
+    url = data.split(",")[0]
+    return extract_page_name(url).split("_")[-1]
+
+def home():
+     return str(Path.home())
+
+def _phantom_alert_path():
+    return os.path.join(home(), ".fwa", "alert-detection.js")
+
+def setup():
+    print("Create the phantomjs script")
+    _write_file(xss_phantomjs_script,  _phantom_alert_path())
+
+
+
+def webserver_path():
+    return os.path.join(home(), ".fwa", "static-webserver")
+def webfile_path(name = "xss.html"):
+    return os.path.join(webserver_path(), name)
+
+def _write_file(content, dst):
+    with open(dst, 'w') as f:
+        f.write(content)
+
+def _clean_static_server():
+    w_path = webserver_path()
+    for filename in os.listdir(w_path):
+        if filename.endswith(".html"):
+            file_path = os.path.join(w_path, filename)
+            os.remove(file_path)
+
+
+
+
+def analyze(valid_entry, fuzz_entry):
+    html_content = fuzz_entry['response']['content']['text']
+    _write_file(html_content, webfile_path())
+    alert_executed = 0
+    if "alert" in html_content: 
+        print("Analyze")
+        print(html_content)
+        data = subprocess.check_output(['phantomjs', _phantom_alert_path()]).decode('utf-8')
+        if data == "VULNERABLE\n":
+            print("[+]Alert executed!")
+            alert_executed = 1
+
+    return {
+        'alert_executed' : alert_executed
+    }
+
+
+
+    """ 
+        It is required a multiple analyzer as the generation of a phantomjs process is slow
+        therefore we run a single phantomjs script for the execution
+    """
+def analyze_multiple_tocheck(url, fuzz_entries):
+    page_name = extract_page_name(url)
+    index = 1
+    pages = []
+    indexed_fuzz_entries = {}
+
+    for fuzz_entry in fuzz_entries:
+        indexed_fuzz_entries[str(index)] = fuzz_entry
+        html_content = fuzz_entry['response']['content']['text']
+        name = "{}_{}.html".format(page_name, index)
+        _write_file(html_content, webfile_path(name))
+        pages.append(name)
+        index = index + 1
+    pass
+
+    # Write test file
+    test_file_path = webfile_path('tests.csv')
+    _write_file("".join(["{}\n".format(p) for p in pages]), test_file_path)
+    data = subprocess.check_output(['phantomjs', _phantom_alert_path(), test_file_path]).decode('utf-8')
+    o = {}
+    if "VULNERABLE" in data:
+        print("[+] Found alert")
+        index_case = get_index_case(data)
+        alert_executed = 1
+        single_fuzz_entry = indexed_fuzz_entries[index_case]
+        used_payload = single_fuzz_entry['payload']
+        o['url'] = url
+        o['fuzzed_param']  = used_payload['name']
+        o['payload_type']  = used_payload['type']
+        o['payload'] = used_payload['value']
+        o['observations'] = {'alert_executed' : alert_executed}
+
+    return o
+    # _clean_static_server()
