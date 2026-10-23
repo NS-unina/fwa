@@ -97,14 +97,34 @@ def write_analyzers(results_file, csv_entries):
         for c in csv_entries:
             writer.writerow(c)
 
+def prepare(analyzers_path):
+    """The analyzers of ``analyzers_path``, set up to be run by ``observe``."""
+    analyzers = _get_analyzers(analyzers_path)
+    _prepare_analyzers(analyzers)
+    return analyzers
+
+
+def observe(analyzers, url, valid_entry, fuzz_entry):
+    """The observation of a fuzz entry (with its ``payload``) against the valid entry of ``url``."""
+    used_payload = fuzz_entry['payload']
+    o = {}
+    o['url'] = url
+    o['fuzzed_param']  = used_payload['name']
+    o['payload_type']  = used_payload['type']
+    o['payload'] = used_payload['value']
+    for a in analyzers:
+        observations = _run_analyzer(a, valid_entry, fuzz_entry)
+        o.update(observations)
+    return o
+
+
 def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file):
     """ Run all the analyzers, get results and write in the output file
 
     Args:
         analyzers_path (str): The path
     """
-    analyzers = _get_analyzers(analyzers_path)
-    _prepare_analyzers(analyzers)
+    analyzers = prepare(analyzers_path)
     # list<entry, <fuzz_strings_per_entry>
     fuzz_entries : list[HarFuzzEntries] = get_fuzz_entries(har.get_entries(helper.fwa_session(session_name)), har.get_fuzz_entries(helper.fwa_session(fuzz_session_name), payloads))
     csv_entries = []
@@ -117,15 +137,7 @@ def run(session_name, fuzz_session_name, analyzers_path, payloads, results_file)
         for single_fuzz_entry in all_fuzz_entries:
             used_payload = single_fuzz_entry['payload']
             if used_payload:
-                o = {}
-                o['url'] = fe['url']
-                o['fuzzed_param']  = used_payload['name']
-                o['payload_type']  = used_payload['type']
-                o['payload'] = used_payload['value']
-                for a in analyzers: 
-                    observations = _run_analyzer(a, valid_entry, single_fuzz_entry)
-                    o.update(observations)
-                csv_entries.append(o)
+                csv_entries.append(observe(analyzers, fe['url'], valid_entry, single_fuzz_entry))
         
 
 

@@ -1,7 +1,7 @@
 import json
 from typing import TypedDict
 from urllib.parse import quote, urlparse
-from fwa.utils import helper
+from fwa.utils import bodies, helper
 
 from fwa.utils.payloads import Payload
 # https://w3c.github.io/web-performance/specs/HAR/Overview.html#sec-object-types-entries
@@ -95,8 +95,23 @@ def get_fuzz_entries(har_file, payloads) ->list:
     return har_entries
 
 
+def _same_endpoint(url: str, entry) -> bool:
+    entry_url = parse_url(entry['request']['url'])
+    if entry_url == url:
+        return True
+    payload = entry.get('payload')
+    if not payload or payload.get('location') != 'path':
+        return False
+    # A path-fuzzed entry differs from its valid entry in the fuzzed segment only.
+    valid, fuzzed = urlparse(url), urlparse(entry_url)
+    valid_segments, fuzzed_segments = valid.path.split('/'), fuzzed.path.split('/')
+    index = int(payload['name'])
+    return (valid.scheme, valid.netloc) == (fuzzed.scheme, fuzzed.netloc) and len(valid_segments) == len(fuzzed_segments) \
+        and valid_segments[:index] + valid_segments[index + 1:] == fuzzed_segments[:index] + fuzzed_segments[index + 1:]
+
+
 def get_entries_by_url(url: str, entries: list[HarEntry]):
-    return [e for e in entries if parse_url(e['request']['url']) == url]
+    return [e for e in entries if _same_endpoint(url, e)]
 
 def _find_payload(params, payload: Payload):
     # Check also for url-encoded values in payload list
@@ -147,6 +162,18 @@ def find_payload(entry: HarEntry, payloads: list[Payload]):
     found = _find_from_payloads(cookies, payloads)
     if found: 
         return found
+
+    # JSON and XML bodies, URL path segments
+    post_data = req.get('postData', {})
+    mime_type = post_data.get('mimeType', '')
+    for location, params in (('json', bodies.json_params(post_data['text']) if 'json' in mime_type else []),
+                             ('xml', [{'name': k, 'value': v} for k, v in bodies.xml_params(post_data['text']).items()]
+                                     if 'xml' in mime_type else []),
+                             ('path', bodies.path_values(req['url']))):
+        found = _find_from_payloads(params, payloads)
+        if found:
+            found['location'] = location
+            return found
     # NONE?
     return found
 

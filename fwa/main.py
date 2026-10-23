@@ -55,14 +55,21 @@ def fuzz(session_name: str = typer.Argument(..., help="The session name, taken f
     querystring: bool = typer.Option(False, help="If set, fuzz the params in the query string"),
     body: bool = typer.Option(False, help="If set, fuzz the params in the body "),
     headers: bool = typer.Option(False, help="If set, fuzz the headers"),
-    threads: int = typer.Option(1, help="The number of threads")
+    threads: int = typer.Option(1, help="The number of threads"),
+    param: Optional[str] = typer.Option(None, help="If set, fuzz only the value of this parameter"),
+    json_body: bool = typer.Option(False, "--json/--no-json", help="If set, fuzz the top-level keys of a JSON body"),
+    xml_body: bool = typer.Option(False, "--xml/--no-xml", help="If set, fuzz the leaf elements of an XML body"),
+    path_segments: bool = typer.Option(False, "--path/--no-path", help="If set, fuzz the URL path segments (named by index)"),
+    early_stop: bool = typer.Option(False, help="If set, analyze each response at once and stop fuzzing an injection point for a vulnerability once its oracle rule detects it (needs --threads 1; writes early_stop.json)"),
+    simple_payloads_first: bool = typer.Option(False, help="If set, send the payloads with evidence in the response first, then the time-based, then the out-of-band ones; shorter first within each")
     ):
     """ 
     Fuzz a session obtained with the record command
     """
     if session_name not in fwa_list_sessions():
         helper.err("Session \"{}\" not found, run \"fwa list\" to show availabe sessions.".format(session_name))
-    fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers, threads)
+    fuzzer.fuzz_from_har(session_name, payload_file, querystring, body, cookies, headers, threads, param,
+                         json_body, xml_body, path_segments, early_stop, simple_payloads_first)
 
 
 @typer_app.command()

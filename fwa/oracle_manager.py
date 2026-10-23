@@ -45,6 +45,21 @@ def _run_analyzer(filename, obs):
 def get_default_oracle_path():
     return os.path.join(helper.get_project_root(), 'oracle')
 
+def get_rules(rules_path):
+    """The names of the oracle rules of ``rules_path``."""
+    return [r.replace(".py", "") for r in _get_rules(rules_path)]
+
+def present_rules(obs, rules):
+    """The rules (names) whose oracle detects a vulnerability in the observation ``obs``."""
+    return [r for r in rules if _run_analyzer(r + ".py", obs)['is_present']]
+
+def payload_types(rule):
+    """The payload types the oracle rule ``rule`` judges (its ``PAYLOAD_TYPES``)."""
+    module = importlib.import_module("fwa.oracle.{}".format(rule))
+    if not hasattr(module, "PAYLOAD_TYPES"):
+        raise AttributeError("oracle rule {} does not declare PAYLOAD_TYPES".format(rule))
+    return module.PAYLOAD_TYPES
+
 def write_results(output_file, results):
     with open(output_file, 'w') as f:
         fnames = results[0].keys()

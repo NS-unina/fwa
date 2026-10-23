@@ -1,0 +1,14 @@
+{
+  "description": "One fwa configuration per vulnerability class of ground_truth/ground_truth_injection.json: the payloads.csv types fuzzed for that class and the oracle rule (fwa/oracle/<rule>.py) whose verdict is reported. Every other payload type and rule is ignored for the class.",
+  "classes": {
+    "sqli": {"rule": "sql", "payload_types": ["SQL", "SQL_TIME_BASED"]},
+    "xss": {"rule": "xss", "payload_types": ["XSS"]},
+    "html_injection": {"rule": "html_injection", "payload_types": ["HTMLI"]},
+    "cmdi": {"rule": "cmdi", "payload_types": ["CMDI", "CMDI_TIME_BASED", "CMDI_OAST"]},
+    "path_traversal": {"rule": "lfi", "payload_types": ["LFI"]},
+    "code_injection": {"rule": "code_injection", "payload_types": ["CODE_INJECTION"]},
+    "nosqli": {"rule": "nosqli", "payload_types": ["NOSQL", "NOSQL_TIME_BASED"]},
+    "ssrf": {"rule": "ssrf", "payload_types": ["SSRF", "SSRF_OAST"]},
+    "open_redirect": {"rule": "open_redirect", "payload_types": ["OPEN_REDIRECT"]}
+  }
+}

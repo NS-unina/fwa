@@ -57,15 +57,18 @@ def flow_entry(flow: mitmproxy.http.HTTPFlow) -> dict:
     connect_time = -1
 
     if flow.server_conn and flow.server_conn not in SERVERS_SEEN:
-        connect_time = (
-            flow.server_conn.timestamp_tcp_setup - flow.server_conn.timestamp_start
-        )
-
-        if flow.server_conn.timestamp_tls_setup is not None:
-            ssl_time = (
-                flow.server_conn.timestamp_tls_setup
-                - flow.server_conn.timestamp_tcp_setup
+        # Through an upstream proxy (mitmproxy upstream mode) the TCP setup of the
+        # server connection is not recorded: its timings stay -1 (do not apply).
+        if flow.server_conn.timestamp_tcp_setup is not None:
+            connect_time = (
+                flow.server_conn.timestamp_tcp_setup - flow.server_conn.timestamp_start
             )
+
+            if flow.server_conn.timestamp_tls_setup is not None:
+                ssl_time = (
+                    flow.server_conn.timestamp_tls_setup
+                    - flow.server_conn.timestamp_tcp_setup
+                )
 
         SERVERS_SEEN.add(flow.server_conn)
 
@@ -153,11 +156,17 @@ def flow_entry(flow: mitmproxy.http.HTTPFlow) -> dict:
             "params": params,
         }
 
-    if flow.server_conn.connected:
+    # Through an upstream proxy the server's address is not known (peername is None);
+    # serverIPAddress is optional in HAR 1.2.
+    if flow.server_conn.connected and flow.server_conn.peername is not None:
         entry["serverIPAddress"] = str(flow.server_conn.peername[0])
 
     if ctx.options.url is "*" or ctx.options.url in flow.request.pretty_url:
         HAR["log"]["entries"].append(entry)
+        # Written before the response reaches the client (fwa fuzz --early-stop reads it then).
+        if ctx.options.entries:
+            with open(ctx.options.entries, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
 
     return entry
 
@@ -269,6 +278,13 @@ def load(loader: addonmanager.Loader):
         typespec=str,
         default="wavsep",
         help="Session name",
+    )
+
+    loader.add_option(
+        name="entries",
+        typespec=str,
+        default="",
+        help="If set, append each recorded HAR entry to this file as a JSON line",
     )
 
 # def done():

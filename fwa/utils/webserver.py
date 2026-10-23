@@ -1,5 +1,6 @@
 from logging import info
 from fwa.utils import helper
+from fwa.utils.net import wait_for_port
 import os
 from mitmproxy import ctx
 
@@ -16,6 +17,8 @@ def web_cmd():
 def start_webserver():
     info("Start fwa webserver")
     os.system(web_cmd() + " &")
+    # The XSS analyzer opens pages from this server: do not start analyzing before it listens.
+    wait_for_port("127.0.0.1", HTTP_SERVER_PORT, 30)
 
 def stop_webserver():
     info("Stop fwa webserver")

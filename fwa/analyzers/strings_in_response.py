@@ -3,6 +3,46 @@ import re
 from fwa.utils.helper import pretty_print_json
 
 
+# Error messages of the DBMSs behind the benchmarks (MySQL/MariaDB, PostgreSQL,
+# SQLite, HSQLDB). The SQL oracle flags one that appears only after fuzzing.
+SQL_ERRORS = [
+    "You have an error in your SQL syntax",
+    "SQL syntax",
+    "mysql_fetch",
+    "supplied argument is not a valid MySQL",
+    "PostgreSQL query failed",
+    "Unclosed quotation mark",
+    "quoted string not properly terminated",
+    "XPATH syntax error",
+    "different number of columns",
+    "SQLSTATE[",
+    "mysqli_",
+    "Warning: mysql_",
+    "MariaDB server version",
+    "syntax error at or near",
+    "unterminated quoted string",
+    "invalid input syntax for",
+    "PSQLException",
+    "pg_query",
+    "SQLITE_ERROR",
+    "SQLite3::",
+    "unrecognized token",
+    "same number of result columns",
+    "unexpected token",
+    "org.hsqldb",
+]
+# MongoDB driver and server errors.
+NOSQL_ERRORS = [
+    "MongoError",
+    "MongoServerError",
+    "MongoDB\\Driver",
+]
+# Output of 1873*7177, computed by the CMDI and CODE_INJECTION payloads of
+# payloads.csv: it appears only if the payload is executed, never by reflection.
+COMPUTED_MARKER = str(1873 * 7177)
+# First line of /etc/passwd.
+PASSWD_MARKER = "root:x:0:0"
+
 KEYWORDS =  [
     "File not found",
     "No such file",
@@ -36,8 +76,10 @@ KEYWORDS =  [
     "quotation mark",
     "syntax",
     "ORA-",
-    "111111"
-  ]
+    "111111",
+    COMPUTED_MARKER,
+    PASSWD_MARKER,
+  ] + SQL_ERRORS + NOSQL_ERRORS
 
 
 def clean(s):

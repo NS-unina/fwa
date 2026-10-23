@@ -12,5 +12,7 @@ def analyze(valid_entry, fuzz_entry):
     time_fuzz = fuzz_entry['time'] + 0.001
 
     return {
-        'time_delay' : (time_fuzz / time_valid  > GREATER_THAN)
+        'time_delay' : (time_fuzz / time_valid  > GREATER_THAN),
+        # Absolute slowdown in ms (HAR entry times are in ms)
+        'time_delay_ms' : int(fuzz_entry['time'] - valid_entry['time'])
     }

